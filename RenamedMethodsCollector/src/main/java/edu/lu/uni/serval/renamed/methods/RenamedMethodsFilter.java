@@ -35,7 +35,7 @@ import jxl.write.WriteException;
  */
 public class RenamedMethodsFilter {
 
-	private static String rootPath = Configuration.OUTPUT_PATH;
+	private static String rootPath = Configuration.getOutputPath();
 	
 	public static void main(String[] args) {
 		
@@ -48,7 +48,7 @@ public class RenamedMethodsFilter {
 		 * 
 		 * Starts with the same token: typos.
 		 */
-		filteroutTyposByParsedMethodNames(Configuration.RENAMED_METHODS_PATH);
+		filteroutTyposByParsedMethodNames(Configuration.getRenamedMethodsPath());
 		
 		// return types of renamed methods
 //		returnTypes();

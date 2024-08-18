@@ -79,7 +79,7 @@ public class ParseActor extends UntypedActor {
 	@Override
 	public void onReceive(Object msg) throws Throwable {
 		if (msg instanceof String && "BEGIN".equals(msg.toString())) {
-			FileHelper.deleteDirectory(outputPath);
+			FileHelper.deleteFile(outputPath);
 			List<File> allRevFiles1 = Arrays.asList(Path.of(inputProjectPath, "revFiles").toFile().listFiles());
 			if (allRevFiles1.isEmpty() || startIndex >= allRevFiles1.size()) {
 				System.out.println(inputProjectPath);
@@ -90,7 +90,7 @@ public class ParseActor extends UntypedActor {
 			if (endIndex == 0 || endIndex > allRevFiles1.size()) {
 				endIndex = allRevFiles1.size();
 			}
-			System.out.println("Files: " + allRevFiles1.size());
+
 			List<File> allRevFiles = allRevFiles1.subList(startIndex, endIndex);
 			int size = allRevFiles.size();
 			
@@ -191,8 +191,8 @@ public class ParseActor extends UntypedActor {
 		newMethodNames.setLength(0);
 
 		String path = outputPath + "/RenamedMethods/";
-		FileHelper.deleteDirectory(path);
-		FileHelper.deleteDirectory(outputPath + "/MethodBodies/");
+		FileHelper.deleteFile(path);
+		FileHelper.deleteFile(outputPath + "/MethodBodies/");
 	}
 
 }

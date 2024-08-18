@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 
 public class MessageFiles {
-	private int id;
+	private final int id;
 	private List<File> revFiles;
 	
 	public MessageFiles(int id) {

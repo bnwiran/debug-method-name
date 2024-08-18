@@ -1,29 +1,16 @@
 package edu.lu.uni.serval.renamed.methods;
 
-import java.io.BufferedReader;
-import java.io.File;
+import edu.lu.uni.serval.utils.FileHelper;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-
-import edu.lu.uni.serval.utils.FileHelper;
-import edu.lu.uni.serval.utils.MapSorter;
-import edu.lu.uni.serval.utils.ReturnType;
-import edu.lu.uni.serval.utils.ReturnType.ReturnTypeClassification;
-import edu.lu.uni.serval.utils.LevenshteinDistance;
-import jxl.CellView;
-import jxl.Workbook;
-import jxl.write.Label;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
 
 /**
  * Parse method names: valid-method-ids-cluster.
@@ -35,11 +22,11 @@ import jxl.write.WriteException;
  */
 public class RenamedMethodsFilter {
 
-	public static void filteroutTyposByParsedMethodNames(String dataPath) {
+	public static void filteroutTyposByParsedMethodNames(String dataPath) throws IOException {
 		String parsedOldMethodNamesFile = dataPath + "/OldMethodNames.txt";
-		List<String> parsedOldMethodNames = readParsedMethodNames(parsedOldMethodNamesFile);
+		List<String> parsedOldMethodNames = Files.readAllLines(Path.of(parsedOldMethodNamesFile));
 		String parsedNewMethodNamesFile = dataPath + "/NewMethodNames.txt";
-		List<String> parsedNewMethodNames = readParsedMethodNames(parsedNewMethodNamesFile);
+		List<String> parsedNewMethodNames = Files.readAllLines(Path.of(parsedNewMethodNamesFile));
 		StringBuilder typos = new StringBuilder("index@ParsedOldName@ParsedNewName\n");
 		StringBuilder renames = new StringBuilder("index@oldToken@newToken\n");
 		StringBuilder oldNames = new StringBuilder();
@@ -120,13 +107,11 @@ public class RenamedMethodsFilter {
 		} finally {
 			if (scanner != null) {
 				scanner.close();
-				scanner = null;
-			}
+      }
 			if (fis != null) {
 				try {
 					fis.close();
-					fis = null;
-				} catch (IOException e) {
+        } catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -182,21 +167,4 @@ public class RenamedMethodsFilter {
 			e.printStackTrace();
 		}
 	}
-
-	private static List<String> readParsedMethodNames(String parsedMethodNamesFile) {
-		List<String> parsedMethodNames = new ArrayList<>();
-		String content = FileHelper.readFile(parsedMethodNamesFile);
-		BufferedReader reader = new BufferedReader(new StringReader(content));
-		String line = null;
-		try {
-			while ((line = reader.readLine()) != null) {
-				parsedMethodNames.add(line);
-			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return parsedMethodNames;
-	}
-
 }

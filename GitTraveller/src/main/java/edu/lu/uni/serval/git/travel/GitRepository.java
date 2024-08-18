@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,20 +43,21 @@ import java.util.Objects;
 public class GitRepository {
 
   private static Logger log = LoggerFactory.getLogger(GitRepository.class);
-  private Repository repository;
   private Git git;
 
-  private String revisedFilePath;
-  private String previousFilePath;
+  private final Path revisedFilesPath;
+  private final Path previousFilesPath;
+  private final Path difffEntriesPath;
 
   private final Map<String, String> tooLongFileNames = new HashMap<>();
 
   /**
    * Creates a new GitRepository with a correct local path of a git repository.
    */
-  public GitRepository(String revisedFilePath, String previousFilePath) {
-    this.revisedFilePath = revisedFilePath;
-    this.previousFilePath = previousFilePath;
+  public GitRepository(String projectName) {
+    this.revisedFilesPath = Path.of(Configuration.getCommitDiffPath(), projectName, "revFiles");
+    this.previousFilesPath = Path.of(Configuration.getCommitDiffPath(), projectName, "prevFiles");
+    this.difffEntriesPath = Path.of(Configuration.getCommitDiffPath(), projectName, "DiffEntries");
   }
 
   /**
@@ -64,8 +66,11 @@ public class GitRepository {
    * @throws GitRepositoryNotFoundException
    * @throws IOException
    */
-  public void open(String repositoryPath) throws IOException {
-    File repoDirectory = new File(repositoryPath);
+  public void open(Path repositoryPath) throws IOException {
+    FileHelper.createDirectory(this.revisedFilesPath);
+    FileHelper.createDirectory(this.previousFilesPath);
+    FileHelper.deleteFile(this.difffEntriesPath);
+    File repoDirectory = repositoryPath.toFile();
 
     FileRepositoryBuilder fileRepositoryBuilder = new FileRepositoryBuilder()
       .setGitDir(repoDirectory)
@@ -73,7 +78,7 @@ public class GitRepository {
       .readEnvironment()
       .findGitDir();
 
-    repository = fileRepositoryBuilder.build();
+    Repository repository = fileRepositoryBuilder.build();
     git = new Git(repository);
   }
 
@@ -83,9 +88,7 @@ public class GitRepository {
   public void close() {
     if (Objects.nonNull(git)) {
       git.close();
-    }
-    if (Objects.nonNull(repository)) {
-      repository.close();
+      git.getRepository().close();
     }
   }
 
@@ -139,7 +142,7 @@ public class GitRepository {
     RevTree tree = commit.getTree();
     CanonicalTreeParser treeParser = new CanonicalTreeParser();
 
-    ObjectReader objReader = repository.newObjectReader();
+    ObjectReader objReader = git.getRepository().newObjectReader();
     treeParser.reset(objReader, tree.getId());
 
     return treeParser;
@@ -169,7 +172,7 @@ public class GitRepository {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
     DiffFormatter formatter = new DiffFormatter(baos);
-    formatter.setRepository(repository);
+    formatter.setRepository(git.getRepository());
     formatter.setContext(1); // 0: without context, 1: with context
     formatter.format(entry); // org.eclipse.jgit.errors.MissingObjectException TODO
 
@@ -189,7 +192,7 @@ public class GitRepository {
     String content = null;
 
     @SuppressWarnings("resource")
-    TreeWalk treeWalk = new TreeWalk(repository);
+    TreeWalk treeWalk = new TreeWalk(git.getRepository());
     RevTree tree = commit.getTree();
 
     treeWalk.addTree(tree);  // org.eclipse.jgit.errors.MissingObjectException TODO
@@ -205,7 +208,7 @@ public class GitRepository {
         // resultingPath)
       } else {
         ObjectId objectID = treeWalk.getObjectId(0);
-        ObjectLoader loader = repository.open(objectID);
+        ObjectLoader loader = git.getRepository().open(objectID);
 
         content = new String(loader.getBytes());
       }
@@ -230,21 +233,20 @@ public class GitRepository {
         }
 
         RevCommit parentCommit = commitDiffEntry.getParentCommit();
-        String createFileName = createFileName(fileName, commitDiffEntry);
-
-        String revisedFileContent = getFileContent(commit, diffentry.getNewPath());
         String previousFileContent = getFileContent(parentCommit, diffentry.getOldPath());
 
-
+        String revisedFileContent = getFileContent(commit, diffentry.getNewPath());
         if (StringUtils.isNotEmpty(revisedFileContent) && StringUtils.isNotEmpty(previousFileContent)) {
-          File revisedFile = new File(this.revisedFilePath + createFileName);
-          FileHelper.createFile(revisedFile, revisedFileContent);
+          String createFileName = createFileName(fileName, commitDiffEntry);
+          Path revisedPath = Path.of(this.revisedFilesPath.toString(), createFileName);
+          FileHelper.createFile(revisedPath.toFile(), revisedFileContent);
 
-          File previousFile = new File(this.previousFilePath + "prev_" + createFileName);
-          FileHelper.createFile(previousFile, previousFileContent);
+          Path previousPath = Path.of(this.previousFilesPath.toString(), "prev_" + createFileName);
+          FileHelper.createFile(previousPath.toFile(), previousFileContent);
 
           String diffEntryChangedDetails = getDiffEntryChangedDetails(commitDiffEntry);
-          FileHelper.outputToFile(this.revisedFilePath.replace("revFiles", "DiffEntries") + createFileName.replace(".java", ".txt"), diffEntryChangedDetails, false);
+          Path diffEntryFilePath = Path.of(this.difffEntriesPath.toString(), createFileName.replace(".java", ".txt"));
+          FileHelper.outputToFile(diffEntryFilePath.toString(), diffEntryChangedDetails, false);
         }
       }
     }

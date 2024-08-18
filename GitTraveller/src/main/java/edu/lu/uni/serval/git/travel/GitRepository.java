@@ -42,7 +42,6 @@ import java.util.Objects;
 
 public class GitRepository {
 
-  private static Logger log = LoggerFactory.getLogger(GitRepository.class);
   private Git git;
 
   private final Path revisedFilesPath;
@@ -63,7 +62,6 @@ public class GitRepository {
   /**
    * Open the git repository.
    *
-   * @throws GitRepositoryNotFoundException
    * @throws IOException
    */
   public void open(Path repositoryPath) throws IOException {
@@ -105,8 +103,6 @@ public class GitRepository {
    * @param revCommit A RevCommit.
    * @throws GitAPIException
    * @throws IOException
-   * @throws IncorrectObjectTypeException
-   * @throws AmbiguousObjectException
    * @throws RevisionSyntaxException
    */
   private List<CommitDiffEntry> getDiffEntriesForEachCommit(RevCommit revCommit) throws RevisionSyntaxException, IOException, GitAPIException {

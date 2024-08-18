@@ -14,11 +14,8 @@ import java.util.Scanner;
 
 /**
  * Parse method names: valid-method-ids-cluster.
- * 
  * Filter out correcting method naming typos.
- * 
  * @author kui.liu
- *
  */
 public class RenamedMethodsFilter {
 
@@ -40,7 +37,7 @@ public class RenamedMethodsFilter {
 			newMethodName = newMethodName.substring(newMethodName.indexOf("@") + 1);
 			List<String> newMethodNameTokens = Arrays.asList(newMethodName.split(","));
 			
-			if (oldMethodNameTokens.get(0).equals(newMethodNameTokens.get(0))) {// typos: starts with the same token.
+			if (oldMethodNameTokens.getFirst().equals(newMethodNameTokens.getFirst())) {// typos: starts with the same token.
 				typos.append(i).append("@").append(oldMethodName).append("@").append(newMethodName).append("\n");
 			} else {
 				if (oldMethodName.equals("main") || newMethodName.equals("main")) { 
@@ -55,8 +52,8 @@ public class RenamedMethodsFilter {
 					typos.append(i).append("@").append(oldMethodName).append("@").append(newMethodName).append("\n");
 					continue;
 				}
-				String oldToken = oldMethodNameTokens.get(0);
-				String newToken = newMethodNameTokens.get(0);
+				String oldToken = oldMethodNameTokens.getFirst();
+				String newToken = newMethodNameTokens.getFirst();
 				if (!oldToken.equalsIgnoreCase(newToken) && !newToken.startsWith(oldToken) && !oldToken.startsWith(newToken)) {
 					renameIndexes.add(i);
 					renames.append(i).append("@").append(oldToken).append("@").append(newToken).append("\n");

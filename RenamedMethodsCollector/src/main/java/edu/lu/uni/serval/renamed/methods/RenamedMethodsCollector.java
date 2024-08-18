@@ -1,14 +1,13 @@
 package edu.lu.uni.serval.renamed.methods;
 
-import java.io.File;
-import java.nio.file.Path;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import edu.lu.uni.serval.git.travel.GitRepository;
-import edu.lu.uni.serval.utils.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Collect renamed methods from the commit history of a Java repo.
@@ -16,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * @author kui.liu
  */
 public class RenamedMethodsCollector {
-  private static Logger log = LoggerFactory.getLogger(RenamedMethodsCollector.class);
+  private final static Logger log = LoggerFactory.getLogger(RenamedMethodsCollector.class);
 
   public static void collect(final String projectName) {
     final File commitDiffDirectory = Path.of(Configuration.getCommitDiffPath(), projectName).toFile();

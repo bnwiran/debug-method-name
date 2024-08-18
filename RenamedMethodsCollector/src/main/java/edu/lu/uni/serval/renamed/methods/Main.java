@@ -15,13 +15,11 @@ public class Main {
         String reposFileName = args[0];
         List<String> projects = readList(reposFileName);
 
-        long l = System.currentTimeMillis();
         projects.forEach(RenamedMethodsCollector::collect);
-        System.out.println((System.currentTimeMillis() - l) + "ms");
     }
 
     private static List<String> readList(String reposFileName) throws IOException {
-        return Files.readAllLines(Path.of(Configuration.getReposRootPath(), reposFileName)).stream()
+        return Files.readAllLines(Path.of(reposFileName).toAbsolutePath()).stream()
                 .map(line -> line.split("/"))
                 .map(line -> {
                     int index = line[line.length - 1].indexOf(".git");

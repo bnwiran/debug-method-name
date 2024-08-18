@@ -5,9 +5,9 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 public class CommitDiffEntry {
 	
-	private RevCommit commit;
-	private RevCommit parentCommit;
-	private DiffEntry diffentry;
+	private final RevCommit commit;
+	private final RevCommit parentCommit;
+	private final DiffEntry diffentry;
 	
 	public RevCommit getCommit() {
 		return commit;

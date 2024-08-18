@@ -26,5 +26,13 @@ public class CommitDiffEntry {
 		this.parentCommit = parentCommit;
 		this.diffentry = diffentry;
 	}
+
+	public boolean isJavaFile() {
+		return diffentry.getNewPath().endsWith(".java");
+	}
+
+	public boolean isModifyType() {
+		return diffentry.getChangeType().equals(DiffEntry.ChangeType.MODIFY);
+	}
 	
 }

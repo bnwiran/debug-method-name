@@ -3,6 +3,7 @@ package edu.lu.uni.serval.git.travel;
 import edu.lu.uni.serval.git.exception.GitRepositoryNotFoundException;
 import edu.lu.uni.serval.git.filter.LineDiffFilter;
 import edu.lu.uni.serval.utils.FileHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -164,18 +165,15 @@ public class GitRepository {
    * The changed details of the DiffEntry.
    * @throws IOException
    */
-  private BufferedReader getDiffEntryChangedDetails(DiffEntry entry) throws IOException {
+  private List<String> getFormattedDiff(DiffEntry entry) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    BufferedReader br = null;
 
-    @SuppressWarnings("resource")
     DiffFormatter formatter = new DiffFormatter(baos);
     formatter.setRepository(repository);
     formatter.setContext(1); // 0: without context, 1: with context
     formatter.format(entry); // org.eclipse.jgit.errors.MissingObjectException TODO
-    br = new BufferedReader(new StringReader(baos.toString()));
 
-    return br;
+    return new BufferedReader(new StringReader(baos.toString())).lines().toList();
   }
 
   /**
@@ -219,74 +217,75 @@ public class GitRepository {
   public void createFilesForGumTree(boolean ignoreTestCases) throws IOException, GitAPIException {
 
     for (CommitDiffEntry commitDiffEntry : getCommitDiffEntries()) {
-      DiffEntry diffentry = commitDiffEntry.getDiffentry();
-
-      if (isJavaFile(diffentry) && isModifyType(diffentry)) {
+      if (commitDiffEntry.isJavaFile() && commitDiffEntry.isModifyType()) {
         RevCommit commit = commitDiffEntry.getCommit();
-        RevCommit parentCommit = commitDiffEntry.getParentCommit();
         if (commit.getParentCount() > 1) {
           continue;
         }
 
-        String commitId = commit.getId().name().substring(0, 6);
+        DiffEntry diffentry = commitDiffEntry.getDiffentry();
         String fileName = diffentry.getNewPath().replaceAll("/", "#");
         if (fileName.toLowerCase(Locale.ENGLISH).contains("test") && ignoreTestCases) {
           continue;
         }
 
-        String parentCommitId = parentCommit.getId().name().substring(0, 6);
-
-        fileName = createFileName(fileName, commitId, parentCommitId);
+        RevCommit parentCommit = commitDiffEntry.getParentCommit();
+        String createFileName = createFileName(fileName, commitDiffEntry);
 
         String revisedFileContent = getFileContent(commit, diffentry.getNewPath());
-        File revisedFile = new File(this.revisedFilePath + fileName);
         String previousFileContent = getFileContent(parentCommit, diffentry.getOldPath());
-        File previousFile = new File(this.previousFilePath + "prev_" + fileName);
 
-        if (revisedFileContent != null && previousFileContent != null && !"".equals(revisedFileContent) && !"".equals(previousFileContent)) {
+
+        if (StringUtils.isNotEmpty(revisedFileContent) && StringUtils.isNotEmpty(previousFileContent)) {
+          File revisedFile = new File(this.revisedFilePath + createFileName);
           FileHelper.createFile(revisedFile, revisedFileContent);
+
+          File previousFile = new File(this.previousFilePath + "prev_" + createFileName);
           FileHelper.createFile(previousFile, previousFileContent);
-          // output DiffEntries
-          BufferedReader reader = getDiffEntryChangedDetails(diffentry);
-          String line = null;
-          StringBuilder diffentryStr = new StringBuilder();
-          diffentryStr.append(parentCommit.getId().name().substring(0, 6)).append("\n");
-          boolean isDiff = false;
-          while ((line = reader.readLine()) != null) {
-            if (!isDiff) {
-              if (LineDiffFilter.filterSignal(line)) {
-                isDiff = true;
-                diffentryStr.append(line).append("\n");
-              }
-            } else {
-              diffentryStr.append(line).append("\n");
-            }
-          }
-          FileHelper.outputToFile(this.revisedFilePath.replace("revFiles", "DiffEntries") + fileName.replace(".java", ".txt"), diffentryStr, false);
+
+          String diffEntryChangedDetails = getDiffEntryChangedDetails(commitDiffEntry);
+          FileHelper.outputToFile(this.revisedFilePath.replace("revFiles", "DiffEntries") + createFileName.replace(".java", ".txt"), diffEntryChangedDetails, false);
         }
       }
     }
   }
 
-  private static boolean isJavaFile(DiffEntry diffentry) {
-    return diffentry.getNewPath().endsWith(".java");
+  private String getDiffEntryChangedDetails(CommitDiffEntry commitDiffEntry) throws IOException {
+    StringBuilder result = new StringBuilder();
+
+    RevCommit parentCommit = commitDiffEntry.getParentCommit();
+    result.append(parentCommit.getId().name().substring(0, 6)).append("\n");
+
+    boolean isDiff = false;
+    DiffEntry diffentry = commitDiffEntry.getDiffentry();
+    for(String line : getFormattedDiff(diffentry)) {
+      if (!isDiff) {
+        if (LineDiffFilter.filterSignal(line)) {
+          isDiff = true;
+          result.append(line).append("\n");
+        }
+      } else {
+        result.append(line).append("\n");
+      }
+    }
+    return result.toString();
   }
 
-  private static boolean isModifyType(DiffEntry diffentry) {
-    return diffentry.getChangeType().equals(DiffEntry.ChangeType.MODIFY);
-  }
+  private String createFileName(String fileName, CommitDiffEntry commitDiffEntry) {
+    RevCommit parentCommit = commitDiffEntry.getParentCommit();
+    String parentCommitId = parentCommit.getId().name().substring(0, 6);
+    String commitId = commitDiffEntry.getCommit().getId().name().substring(0, 6);
+    String result = commitId + "_" + parentCommitId + "_" + fileName;
 
-  private String createFileName(String t, String commitId, String parentCommitId) {
-    String fileName = commitId + "_" + parentCommitId + "_" + t;
-    if (fileName.length() > 200) {
-      if (!tooLongFileNames.containsKey(fileName)) {
+    if (result.length() > 200) {
+      if (!tooLongFileNames.containsKey(result)) {
         int size = tooLongFileNames.size() + 1;
         String newFileName = commitId + "_" + parentCommitId + "_" + String.format("%05d", size) + ".java";
-        tooLongFileNames.put(fileName, newFileName);
+        tooLongFileNames.put(result, newFileName);
       }
 
-      return tooLongFileNames.get(fileName);
+      return tooLongFileNames.get(result);
     }
-    return fileName;
+    return result;
   }
 }

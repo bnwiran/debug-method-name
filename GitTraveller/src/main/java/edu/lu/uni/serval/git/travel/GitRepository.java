@@ -124,7 +124,7 @@ public class GitRepository {
 			throws GitRepositoryNotFoundException,
 			NotValidGitRepositoryException {
 		File file = new File(gitPath);
-		if (gitPath.endsWith("/.git")) {
+		if (gitPath.endsWith(File.separator + ".git")) {
 			if (file.exists()) {
 			// The git repository is existed.
 			} else {

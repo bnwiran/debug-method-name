@@ -35,233 +35,10 @@ import jxl.write.WriteException;
  */
 public class RenamedMethodsFilter {
 
-	private static String rootPath = Configuration.getOutputPath();
-	
-	public static void main(String[] args) {
-		
-		// Fileter out typos by leveraging levenshtein distance.
-//		filteroutTyposByLevenshteinDistance();
-		
-		/*
-		 * 1. the length of the old method name is equal to the length of the new method name. 
-		 * 2. different length.
-		 * 
-		 * Starts with the same token: typos.
-		 */
-		filteroutTyposByParsedMethodNames(Configuration.getRenamedMethodsPath());
-		
-		// return types of renamed methods
-//		returnTypes();
-	}
-
-	public static void returnTypes() {
-		List<String> returnTypesList = new ArrayList<>();
-		try {
-			FileInputStream fis = new FileInputStream(rootPath + "RenamedMethods.txt");
-			Scanner scanner = new Scanner(fis);
-			while (scanner.hasNextLine()) {
-				String line = scanner.nextLine();
-				String[] elements = line.split(":");
-				String returnType = elements[8];
-				if ("Arrays".equals(returnType)) {
-					returnType = "Arrays[]";
-				}
-				returnTypesList.add(new ReturnType().readReturnType(returnType, ReturnTypeClassification.ABSTRACT) + 
-						"@" + elements[4] + "@" + elements[5]);
-			}
-			scanner.close();
-			fis.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		String content = FileHelper.readFile(rootPath + "RenamedMethodNames.txt");
-		BufferedReader reader = new BufferedReader(new StringReader(content));
-		String line = null;
-		Map<String, Map<String, Integer>> oldTokens = new HashMap<>();
-		Map<String, Map<String, Integer>> newTokens = new HashMap<>();
-		try {
-			while ((line = reader.readLine()) != null) {
-				String[] elements = line.split("@");
-				int index = Integer.parseInt(elements[0]);
-				String oldToken = elements[1];
-				String newToken = elements[2];
-				String names = returnTypesList.get(index);
-				String returnType = names.substring(0, names.indexOf("@"));
-				
-				if ("boolean".equals(returnType)) {
-					if (newToken.equals("is") || newToken.equals("has") || newToken.equals("equals")
-							 || newToken.equals("should") || newToken.equals("needs") || newToken.equals("contains")
-							 || newToken.equals("can") || newToken.equals("are") || newToken.equals("starts")
-							 || newToken.equals("start") || oldToken.equals("get") || oldToken.equals("set")) {
-						System.err.println(index + "@" + names);
-					}
-				} else if ("OTHERS".equals(returnType)) {
-					if (oldToken.equals("is") || oldToken.equals("has") || oldToken.equals("exit") 
-							|| oldToken.equals("before") || oldToken.equals("id")
-							|| newToken.equals("get") || newToken.equals("create") || newToken.equals("new") 
-							|| newToken.equals("to") || newToken.equals("find") || newToken.equals("next")) {
-						
-					}
-				} else if ("void".equals(returnType)) {
-					if (oldToken.equals("are") || oldToken.equals("get") || oldToken.equals("after") || oldToken.equals("is") 
-							|| oldToken.equals("before") || oldToken.equals("end") || oldToken.equals("find") || oldToken.equals("index")
-							|| oldToken.equals("to") || oldToken.equals("copy") || oldToken.equals("return") ) {
-						
-					}
-				} else if ("double".equals(returnType)) {
-					if (oldToken.equals("string") || newToken.equals("double")) {
-						
-					}
-				}
-				
-				if (oldTokens.containsKey(returnType)) {
-					Map<String, Integer> oldTokensMap = oldTokens.get(returnType);
-					if (oldTokensMap.containsKey(oldToken)) {
-						oldTokensMap.put(oldToken, oldTokensMap.get(oldToken) + 1);
-					} else {
-						oldTokensMap.put(oldToken, 1);
-					}
-				} else {
-					Map<String, Integer> oldTokensMap = new HashMap<>();
-					oldTokensMap.put(oldToken, 1);
-					oldTokens.put(returnType, oldTokensMap);
-				}
-				
-				if (newTokens.containsKey(returnType)) {
-					Map<String, Integer> newTokensMap = newTokens.get(returnType);
-					if (newTokensMap.containsKey(newToken)) {
-						newTokensMap.put(newToken, newTokensMap.get(newToken) + 1);
-					} else {
-						newTokensMap.put(newToken, 1);
-					}
-				} else {
-					Map<String, Integer> newTokensMap = new HashMap<>();
-					newTokensMap.put(newToken, 1);
-					newTokens.put(returnType, newTokensMap);
-				}
-			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		for (Map.Entry<String, Map<String, Integer>> entry : oldTokens.entrySet()) {
-			MapSorter<String, Integer> sorter = new MapSorter<>();
-			oldTokens.put(entry.getKey(), sorter.sortByValueDescending(entry.getValue()));
-		}
-		for (Map.Entry<String, Map<String, Integer>> entry : newTokens.entrySet()) {
-			MapSorter<String, Integer> sorter = new MapSorter<>();
-			newTokens.put(entry.getKey(), sorter.sortByValueDescending(entry.getValue()));
-		}
-		
-		exportData(oldTokens, rootPath + "oldTokens.xls");
-		exportData(newTokens, rootPath + "newTokens.xls");
-	}
-
-	private static void exportData(Map<String, Map<String, Integer>> oldTokens, String fileName) {
-		File file = new File(fileName);
-		
-		try {
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			
-			// new excel file.
-			WritableWorkbook book = Workbook.createWorkbook(file);
-			WritableSheet sheet = book.createSheet("sheet ", 0);
-
-			// Setting cell width according to the length of content automatically.
-			CellView cellView = new CellView();
-			cellView.setAutosize(true);
-			for (int i = 0, length = oldTokens.size() * 3; i < length; i++) {
-				sheet.setColumnView(i, cellView);
-			}
-			
-			int column = 0;
-			for (Map.Entry<String, Map<String, Integer>> entry : oldTokens.entrySet()) {
-				String returnType = entry.getKey();
-				Map<String, Integer> tokens = entry.getValue();
-				int rowIndex = 0;
-				sheet.addCell(new Label(column, rowIndex, returnType));
-				sheet.addCell(new Label(column + 1, rowIndex, ""));
-				sheet.addCell(new Label(column + 2, rowIndex, ""));
-				rowIndex ++;
-				sheet.addCell(new Label(column, rowIndex, "Token"));
-				sheet.addCell(new Label(column + 1, rowIndex, "Quantity"));
-				sheet.addCell(new Label(column + 2, rowIndex, ""));
-				rowIndex ++;
-				
-				for (Map.Entry<String, Integer> subEntry : tokens.entrySet()) {
-					sheet.addCell(new Label(column, rowIndex, subEntry.getKey()));
-					sheet.addCell(new Label(column + 1, rowIndex, subEntry.getValue() + ""));
-					sheet.addCell(new Label(column + 2, rowIndex, ""));
-					rowIndex++;
-				}
-				sheet.mergeCells(column, 0, column + 1, 0);
-				column += 3;
-			}
-			
-			book.write();
-			book.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (WriteException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void filteroutTyposByLevenshteinDistance() {
-		List<String> oldMethodNames = readParsedMethodNames(rootPath + "OldMethodNames.list");
-		List<String> newMethodNames = readParsedMethodNames(rootPath + "NewMethodNames.list");
-		List<Integer> distances = new ArrayList<>();
-		StringBuilder distanceBuilder = new StringBuilder();
-		for (int i = 0, size = oldMethodNames.size(); i < size; i ++) {
-			String oldMethodName = oldMethodNames.get(i);
-			String newMethodName = newMethodNames.get(i);
-			int levenshteinDistance = new LevenshteinDistance().computeLevenshteinDistance(oldMethodName.toLowerCase(), newMethodName.toLowerCase());
-			distances.add(levenshteinDistance);
-			distanceBuilder.append(levenshteinDistance).append("\n");
-		}
-		FileHelper.outputToFile(rootPath + "LevenshteinDistances.csv", distanceBuilder, false);
-		
-		
-		
-//		oldMethodNames = readParsedMethodNames("../OUTPUT/RenamedMethods/renameOldNames.list");
-//		newMethodNames = readParsedMethodNames("../OUTPUT/RenamedMethods/renameNewNames.list");
-//		distances = new ArrayList<>();
-//		distanceBuilder = new StringBuilder();
-//		for (int i = 0, size = oldMethodNames.size(); i < size; i ++) {
-//			String oldMethodName = oldMethodNames.get(i);
-//			String newMethodName = newMethodNames.get(i);
-//			int levenshteinDistance = new LevenshteinDistance().computeLevenshteinDistance(oldMethodName.toLowerCase(), newMethodName.toLowerCase());
-//			distances.add(levenshteinDistance);
-//			distanceBuilder.append(levenshteinDistance).append("\n");
-//		}
-//		FileHelper.outputToFile("../OUTPUT/RenamedMethods/LevenshteinDistances.csv", distanceBuilder, false);
-//		
-//		
-//		
-//		oldMethodNames = readParsedMethodNames("../OUTPUT/TypoMethods/typoOldNames.list");
-//		newMethodNames = readParsedMethodNames("../OUTPUT/TypoMethods/typoNewNames.list");
-//		distances = new ArrayList<>();
-//		distanceBuilder = new StringBuilder();
-//		for (int i = 0, size = oldMethodNames.size(); i < size; i ++) {
-//			String oldMethodName = oldMethodNames.get(i);
-//			String newMethodName = newMethodNames.get(i);
-//			int levenshteinDistance = new LevenshteinDistance().computeLevenshteinDistance(oldMethodName.toLowerCase(), newMethodName.toLowerCase());
-//			distances.add(levenshteinDistance);
-//			distanceBuilder.append(levenshteinDistance).append("\n");
-//		}
-//		FileHelper.outputToFile("../OUTPUT/TypoMethods/LevenshteinDistances.csv", distanceBuilder, false);
-	}
-
 	public static void filteroutTyposByParsedMethodNames(String dataPath) {
-		String parsedOldMethodNamesFile = dataPath + "OldMethodNames.txt";
+		String parsedOldMethodNamesFile = dataPath + "/OldMethodNames.txt";
 		List<String> parsedOldMethodNames = readParsedMethodNames(parsedOldMethodNamesFile);
-		String parsedNewMethodNamesFile = dataPath + "NewMethodNames.txt";
+		String parsedNewMethodNamesFile = dataPath + "/NewMethodNames.txt";
 		List<String> parsedNewMethodNames = readParsedMethodNames(parsedNewMethodNamesFile);
 		StringBuilder typos = new StringBuilder("index@ParsedOldName@ParsedNewName\n");
 		StringBuilder renames = new StringBuilder("index@oldToken@newToken\n");
@@ -303,39 +80,17 @@ public class RenamedMethodsFilter {
 				}
 			}
 		}
-		FileHelper.outputToFile(dataPath + "Typo/MethodNamePairs.txt", typos, false);
-		FileHelper.outputToFile(dataPath + "ActualRenamed/MethodNamesInfo.txt", renames, false);
-		FileHelper.outputToFile(dataPath + "ActualRenamed/ParsedOldNames.txt", oldNames, false);
-		FileHelper.outputToFile(dataPath + "ActualRenamed/ParsedNewNames.txt", newNames, false);
-		
-		
-//		List<String> oldMethodNames = readParsedMethodNames(rootPath + "RenamedMethods/OldMethodNames.txt");
-//		List<String> newMethodNames = readParsedMethodNames(rootPath + "RenamedMethods/NewMethodNames.txt");
-//		StringBuilder typoOldNames = new StringBuilder();
-//		StringBuilder typoNewNames = new StringBuilder();
-//		StringBuilder renameOldNames = new StringBuilder();
-//		StringBuilder renameNewNames = new StringBuilder();
-//		for (int i = 0, size = oldMethodNames.size(); i < size; i ++) {
-//			if (renameIndexes.contains(i)) {
-//				renameOldNames.append(oldMethodNames.get(i)).append("\n");
-//				renameNewNames.append(newMethodNames.get(i)).append("\n");
-//			} else {
-//				typoOldNames.append(oldMethodNames.get(i)).append("\n");
-//				typoNewNames.append(newMethodNames.get(i)).append("\n");
-//			}
-//		}
-//		FileHelper.outputToFile(rootPath + "ActualRenamed/OldNames.txt", renameOldNames, false);
-//		FileHelper.outputToFile(rootPath + "ActualRenamed/NewNames.txt", renameNewNames, false);
-//		FileHelper.outputToFile(rootPath + "Typo/OldNames.txt", typoOldNames, false);
-//		FileHelper.outputToFile(rootPath + "Typo/NewNames.txt", typoNewNames, false);
-		
+		FileHelper.outputToFile(dataPath + "/Typo/MethodNamePairs.txt", typos, false);
+		FileHelper.outputToFile(dataPath + "/ActualRenamed/MethodNamesInfo.txt", renames, false);
+		FileHelper.outputToFile(dataPath + "/ActualRenamed/ParsedOldNames.txt", oldNames, false);
+		FileHelper.outputToFile(dataPath + "/ActualRenamed/ParsedNewNames.txt", newNames, false);
 
 		// Output tokens of method bodies.
 		StringBuilder renamedMethodsBuilder = new StringBuilder();
 		StringBuilder renameMethodTokensSizeBuilder = new StringBuilder();
 		StringBuilder typoMethodsBuilder = new StringBuilder();
 		StringBuilder typoMethodTokensSizeBuilder = new StringBuilder();
-		String methodsFile = dataPath + "RenamedMethods.txt";
+		String methodsFile = dataPath + "/RenamedMethods.txt";
 		FileInputStream fis = null;
 		Scanner scanner = null;
 		try {
@@ -376,19 +131,19 @@ public class RenamedMethodsFilter {
 				}
 			}
 		}
-		FileHelper.outputToFile(dataPath + "ActualRenamed/MethodTokens.txt", renamedMethodsBuilder, false);
+		FileHelper.outputToFile(dataPath + "/ActualRenamed/MethodTokens.txt", renamedMethodsBuilder, false);
 		renamedMethodsBuilder.setLength(0);
-		FileHelper.outputToFile(dataPath + "ActualRenamed/MethodTokensSizes.csv", renameMethodTokensSizeBuilder, false);
-		FileHelper.outputToFile(dataPath + "Typo/MethodTokens.txt", typoMethodsBuilder, false);
+		FileHelper.outputToFile(dataPath + "/ActualRenamed/MethodTokensSizes.csv", renameMethodTokensSizeBuilder, false);
+		FileHelper.outputToFile(dataPath + "/Typo/MethodTokens.txt", typoMethodsBuilder, false);
 		renamedMethodsBuilder.setLength(0);
-		FileHelper.outputToFile(dataPath + "Typo/MethodTokensSizes.csv", typoMethodTokensSizeBuilder, false);
+		FileHelper.outputToFile(dataPath + "/Typo/MethodTokensSizes.csv", typoMethodTokensSizeBuilder, false);
 		
 		
 		// Output method bodies.
 		StringBuilder renamedMethodBodies = new StringBuilder();
 		StringBuilder typoMethodBodies = new StringBuilder();
 		try {
-			fis = new FileInputStream(dataPath + "MethodBodies.txt");
+			fis = new FileInputStream(dataPath + "/MethodBodies.txt");
 			scanner = new Scanner(fis);
 			int index = -1;
 			StringBuilder singleMethod = new StringBuilder();
@@ -419,8 +174,8 @@ public class RenamedMethodsFilter {
 				singleMethod.setLength(0);
 			}
 
-			FileHelper.outputToFile(dataPath + "ActualRenamed/MethodBodies.txt", renamedMethodBodies, false);
-			FileHelper.outputToFile(dataPath + "Typo/MethodBodies.txt", typoMethodBodies, false);
+			FileHelper.outputToFile(dataPath + "/ActualRenamed/MethodBodies.txt", renamedMethodBodies, false);
+			FileHelper.outputToFile(dataPath + "/Typo/MethodBodies.txt", typoMethodBodies, false);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

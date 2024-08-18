@@ -264,7 +264,7 @@ public class DataInitializer {
 		isMethodBody = false;
 		
 		// Export the method bodies of further selected renamed methods.
-		String renamedMethodBodyFile = this.renamedMethodsPath + "MethodBodies.txt";
+		String renamedMethodBodyFile = this.renamedMethodsPath + "/MethodBodies.txt";
 		fis = new FileInputStream(renamedMethodBodyFile);
 		scanner = new Scanner(fis);
 		index = -1;

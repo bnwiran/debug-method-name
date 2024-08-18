@@ -34,10 +34,6 @@ public class CommitDiffs {
 
 	private static Logger log = LoggerFactory.getLogger(CommitDiffs.class);
 
-	public static List<String> readList(String fileName) throws IOException {
-		return Files.readAllLines(Path.of(fileName));
-	}
-
 	public static void traverseGitRepos(String projectName, String projectGit) {
 		String revisedFilesPath = Configuration.getCommitDiffPath() + "/" + projectName + "/revFiles/";
 		String previousFilesPath = Configuration.getCommitDiffPath() + "/" + projectName + "/prevFiles/";
@@ -49,11 +45,11 @@ public class CommitDiffs {
 			gitRepo.open();
 			List<RevCommit> commits = gitRepo.getAllCommits(false);
             log.debug("{} Commits: {}", projectName, commits.size());
-			List<CommitDiffEntry> commitDiffentries = gitRepo.getCommitDiffEntries(commits);
+			List<CommitDiffEntry> commitDiffEntries = gitRepo.getCommitDiffEntries(commits);
 			// previous java file vs. modified java file
-			gitRepo.createFilesForGumTree(commitDiffentries, true);
+			gitRepo.createFilesForGumTree(commitDiffEntries, true);
 		} catch (Exception e) {
-			e.printStackTrace();
+            log.error("Error in reading {}: {}", projectName, e.getMessage());
 		} finally {
 			gitRepo.close();
 		}

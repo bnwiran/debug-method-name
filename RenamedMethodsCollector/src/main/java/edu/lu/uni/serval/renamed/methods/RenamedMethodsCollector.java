@@ -1,6 +1,7 @@
 package edu.lu.uni.serval.renamed.methods;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import akka.actor.ActorRef;
@@ -17,8 +18,8 @@ public class RenamedMethodsCollector {
 	private static final String INPUT_DATA_PATH = Configuration.getCommitDiffPath() + "/";
 	private static final String OUTPUT_DATA_PATH = Configuration.getRenamedMethodsPath() + "/";
 
-	public static void collect(String projectName) {
-		String filePath = INPUT_DATA_PATH + projectName;
+	public static void collect(final String projectName) {
+		final String filePath = Path.of(Configuration.getCommitDiffPath(), projectName).toAbsolutePath().toString();
 		if (!new File(filePath).exists()) {
 			File projectPath = new File(Configuration.getReposRootPath() + "/" + projectName);
 			if (!projectPath.exists()) return;
@@ -30,23 +31,19 @@ public class RenamedMethodsCollector {
 
 			File projectFile = projectFiles[0];
 			String projectGit = projectFile.getPath() + "/.git";
-			filePath = INPUT_DATA_PATH + projectName;
 
 			if (!new File(filePath).exists()) {
 				CommitDiffs.traverseGitRepos(projectName, projectGit);
 			}
+}
 
-			String outputPath = OUTPUT_DATA_PATH + projectName + "/";
-			parseRenamedMethods(filePath, outputPath);
-		} else {
-			String outputPath = OUTPUT_DATA_PATH + projectName + "/";
-			parseRenamedMethods(filePath, outputPath);
-		}
+		String outputPath = Path.of(Configuration.getRenamedMethodsPath(), projectName, "/").toAbsolutePath().toString();
+		parseRenamedMethods(filePath, outputPath);
 	}
 
 	private static void parseRenamedMethods(String inputProject, String outputPath) {
-		ActorSystem system = null;
-		ActorRef gitTravelActor = null;
+		ActorSystem system;
+		ActorRef gitTravelActor;
 		try {
 			system = ActorSystem.create("methodNames-system");
 			gitTravelActor = system.actorOf(ParseActor.props(inputProject, outputPath), "parse-actor");

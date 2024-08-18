@@ -69,7 +69,7 @@ public class RenamedMethods {
 	
 	public static void selectRenamedMethods(String renamedMethodsPath, List<String> methodInfoOfRenamedMethods, List<String> tokenVectorsOfRenamedMethods) throws IOException {
 		// Read tokens of renamed method bodies.
-		FileInputStream fis = new FileInputStream(renamedMethodsPath + "RenamedMethods.txt");
+		FileInputStream fis = new FileInputStream(renamedMethodsPath + "/RenamedMethods.txt");
 		Scanner scanner = new Scanner(fis);
 		while (scanner.hasNextLine()) {
 			String line = scanner.nextLine();

@@ -3,6 +3,8 @@ package edu.lu.uni.serval.renamed.methods;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +34,7 @@ public class ParseActor extends UntypedActor {
 	//lucene-solr
 	public ParseActor(String inputProjectPath, String outputPath) {
 		this.inputProjectPath = inputProjectPath;
-		projectName = inputProjectPath.substring(inputProjectPath.lastIndexOf("/") + 1);
+		projectName = inputProjectPath.substring(inputProjectPath.lastIndexOf(File.separatorChar) + 1);
 		this.outputPath = outputPath;
 		
 		travelRouter = this.getContext().actorOf(new RoundRobinPool(numberOfWorkers)
@@ -41,7 +43,7 @@ public class ParseActor extends UntypedActor {
 	
 	public ParseActor(String inputProjectPath, String outputPath, int startIndex, int endIndex) {
 		this.inputProjectPath = inputProjectPath;
-		projectName = inputProjectPath.substring(inputProjectPath.lastIndexOf("/") + 1);
+		projectName = inputProjectPath.substring(inputProjectPath.lastIndexOf(File.separatorChar) + 1);
 		this.outputPath = outputPath;
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
@@ -78,7 +80,7 @@ public class ParseActor extends UntypedActor {
 	public void onReceive(Object msg) throws Throwable {
 		if (msg instanceof String && "BEGIN".equals(msg.toString())) {
 			FileHelper.deleteDirectory(outputPath);
-			List<File> allRevFiles1 = Arrays.asList(new File(inputProjectPath + "/revFiles/").listFiles());
+			List<File> allRevFiles1 = Arrays.asList(Path.of(inputProjectPath, "revFiles").toFile().listFiles());
 			if (allRevFiles1.isEmpty() || startIndex >= allRevFiles1.size()) {
 				System.out.println(inputProjectPath);
 				this.getContext().stop(travelRouter);
@@ -127,23 +129,23 @@ public class ParseActor extends UntypedActor {
 	}
 
 	private void mergeData() throws IOException {
-		String methodsFile = outputPath + "RenamedMethods.txt";
-		String oldMethodNamesFile = outputPath + "OldMethodNames.txt";
-		String newMethodNamesFile = outputPath + "NewMethodNames.txt";
-		String sizesFile = outputPath + "Sizes.csv";
-		String methodBodiesFile = outputPath + "MethodBodies.txt";
+		String methodsFile = outputPath + "/RenamedMethods.txt";
 		FileHelper.deleteFile(methodsFile);
+
+		String methodBodiesFile = outputPath + "/MethodBodies.txt";
 		FileHelper.deleteFile(methodBodiesFile);
-		
-		String path = outputPath + "RenamedMethods/";
+
 		StringBuilder sizes = new StringBuilder();
 		StringBuilder methods = new StringBuilder();
 		StringBuilder oldMethodNames = new StringBuilder();
 		StringBuilder newMethodNames = new StringBuilder();
 		int counter = 0;
 		for (int i = 1; i <= numberOfWorkers; i ++) {
-			if (!new File(path + "RenamedMethods_" + i + ".txt").exists()) continue;
-			FileInputStream fis = new FileInputStream(path + "RenamedMethods_" + i + ".txt");
+			File renamedMethodFile = Path.of(outputPath, "RenamedMethods", "RenamedMethods_" + i + ".txt").toFile();
+			if (!renamedMethodFile.exists()) {
+				continue;
+			}
+			FileInputStream fis = new FileInputStream(renamedMethodFile);
 			Scanner scanner = new Scanner(fis);
 			
 			while (scanner.hasNextLine()) {
@@ -168,22 +170,29 @@ public class ParseActor extends UntypedActor {
 			scanner.close();
 			fis.close();
 			
-			FileHelper.outputToFile(methodBodiesFile, FileHelper.readFile(outputPath + "MethodBodies/MethodBodies_" + i + ".txt"), true);
+			FileHelper.outputToFile(methodBodiesFile, Files.readString(Path.of(outputPath, "MethodBodies", "MethodBodies_" + i + ".txt")), true);
 		}
 		
-		if (methods.length() > 0) {
+		if (!methods.isEmpty()) {
 			FileHelper.outputToFile(methodsFile, methods, true);
 			methods.setLength(0);
 		}
+
+		String sizesFile = outputPath + "/Sizes.csv";
 		FileHelper.outputToFile(sizesFile, sizes, false);
 		sizes.setLength(0);
+
+		String oldMethodNamesFile = outputPath + "/OldMethodNames.txt";
 		FileHelper.outputToFile(oldMethodNamesFile, oldMethodNames, false);
 		oldMethodNames.setLength(0);
+
+		String newMethodNamesFile = outputPath + "/NewMethodNames.txt";
 		FileHelper.outputToFile(newMethodNamesFile, newMethodNames, false);
 		newMethodNames.setLength(0);
 
+		String path = outputPath + "/RenamedMethods/";
 		FileHelper.deleteDirectory(path);
-		FileHelper.deleteDirectory(outputPath + "MethodBodies/");
+		FileHelper.deleteDirectory(outputPath + "/MethodBodies/");
 	}
 
 }

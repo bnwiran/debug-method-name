@@ -30,8 +30,8 @@ public class ParseWorker extends UntypedActor {
 	private String projectName;
 	
 	public ParseWorker(String rootPath, String projectName) {
-		OUTPUT_PATH1 = rootPath + "RenamedMethods/";
-		OUTPUT_PATH2 = rootPath + "MethodBodies/";
+		OUTPUT_PATH1 = rootPath + "/RenamedMethods/";
+		OUTPUT_PATH2 = rootPath + "/MethodBodies/";
 		this.projectName = projectName;
 	}
 
@@ -61,9 +61,9 @@ public class ParseWorker extends UntypedActor {
 				String fileName = revFile.getName();
 				if (!fileName.endsWith(".java")) continue;
 				
-				String parentPath = revFile.getParent() + "/";
-				File prevFile = new File(parentPath.replace("/revFiles/", "/prevFiles/") + "prev_" + fileName);
-				File diffentryFile = new File(parentPath.replace("/revFiles/", "/DiffEntries/") + fileName.replace(".java", ".txt"));
+				String parentPath = revFile.getParent();
+				File prevFile = new File(parentPath.replace(File.separatorChar + "revFiles", File.separatorChar + "prevFiles") + File.separatorChar + "prev_" + fileName);
+				File diffentryFile = new File(parentPath.replace(File.separatorChar + "revFiles", File.separatorChar + "DiffEntries")  + File.separatorChar + fileName.replace(".java", ".txt"));
 				
 				String filePath = fileName.toLowerCase(Locale.ROOT);//revFile.getPath().toLowerCase(Locale.ROOT);
 				if (filePath.contains("test") || filePath.contains("example") || filePath.contains("template") || filePath.contains("sample")) {

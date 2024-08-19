@@ -3,6 +3,7 @@ package edu.lu.uni.serval.renamed.methods;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,12 +22,11 @@ import akka.routing.RoundRobinPool;
 import edu.lu.uni.serval.utils.FileHelper;
 
 public class ParseActor extends UntypedActor {
-	private static Logger log = LoggerFactory.getLogger(ParseActor.class);
+	private static final Logger log = LoggerFactory.getLogger(ParseActor.class);
 	
-	private String inputProjectPath;
-	private String outputPath;
-	private String projectName;
-	private ActorRef travelRouter;
+	private final String inputProjectPath;
+	private final String outputPath;
+  private final ActorRef travelRouter;
 	private int numberOfWorkers = 500;
 	int number = 0;
 	int startIndex = 0;
@@ -34,19 +34,9 @@ public class ParseActor extends UntypedActor {
 	//lucene-solr
 	public ParseActor(String inputProjectPath, String outputPath) {
 		this.inputProjectPath = inputProjectPath;
-		projectName = inputProjectPath.substring(inputProjectPath.lastIndexOf(File.separatorChar) + 1);
+    String projectName = inputProjectPath.substring(inputProjectPath.lastIndexOf(File.separatorChar) + 1);
 		this.outputPath = outputPath;
 		
-		travelRouter = this.getContext().actorOf(new RoundRobinPool(numberOfWorkers)
-				.props(ParseWorker.props(this.outputPath, projectName)), "parse-router");
-	}
-	
-	public ParseActor(String inputProjectPath, String outputPath, int startIndex, int endIndex) {
-		this.inputProjectPath = inputProjectPath;
-		projectName = inputProjectPath.substring(inputProjectPath.lastIndexOf(File.separatorChar) + 1);
-		this.outputPath = outputPath;
-		this.startIndex = startIndex;
-		this.endIndex = endIndex;
 		travelRouter = this.getContext().actorOf(new RoundRobinPool(numberOfWorkers)
 				.props(ParseWorker.props(this.outputPath, projectName)), "parse-router");
 	}
@@ -54,27 +44,16 @@ public class ParseActor extends UntypedActor {
 	public static Props props(final String rootPath, final String outputPath) {
 		return Props.create(new Creator<ParseActor>() {
 
+			@Serial
 			private static final long serialVersionUID = -4156981079570315552L;
 
 			@Override
-			public ParseActor create() throws Exception {
+			public ParseActor create() {
 				return new ParseActor(rootPath, outputPath);
 			}
 		});
 	}
 
-	public static Props props(final String rootPath, final String outputPath, final int startIndex, final int endIndex) {
-		return Props.create(new Creator<ParseActor>() {
-
-			private static final long serialVersionUID = -4156981079570315552L;
-
-			@Override
-			public ParseActor create() throws Exception {
-				return new ParseActor(rootPath, outputPath, startIndex, endIndex);
-			}
-		});
-	}
-	
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onReceive(Object msg) throws Throwable {
@@ -104,17 +83,16 @@ public class ParseActor extends UntypedActor {
 				int beginIndex = i * average + index;
 				if (index < remainder) index ++;
 				int endIndex = (i + 1) * average + index;
-				
-				List<File> msgFilesOfWorker = new ArrayList<>();
-				msgFilesOfWorker.addAll(allRevFiles.subList(beginIndex, endIndex));
+
+        List<File> msgFilesOfWorker = new ArrayList<>(allRevFiles.subList(beginIndex, endIndex));
 				MessageFiles messageFiles = new MessageFiles(i + 1);
 				messageFiles.setRevFiles(msgFilesOfWorker);
 				travelRouter.tell(messageFiles, getSelf());
-				log.debug("Assign a task to worker #" + (i + 1) + "...");
+        log.debug("Assign a task to worker #{}...", i + 1);
 			}
 		} else if (msg instanceof String && "END".equals(msg.toString())) {
 			number ++;
-			log.debug(number + " workers finished their work...");
+      log.debug("{} workers finished their work...", number);
 			if (number == numberOfWorkers) {
 				mergeData(); // Merge data.
 				RenamedMethodsFilter.filteroutTyposByParsedMethodNames(outputPath);

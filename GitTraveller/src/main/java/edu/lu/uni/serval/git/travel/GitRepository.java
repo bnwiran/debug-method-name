@@ -1,6 +1,5 @@
 package edu.lu.uni.serval.git.travel;
 
-import edu.lu.uni.serval.git.exception.GitRepositoryNotFoundException;
 import edu.lu.uni.serval.git.filter.LineDiffFilter;
 import edu.lu.uni.serval.utils.FileHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -8,8 +7,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.errors.AmbiguousObjectException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -23,8 +20,6 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -47,6 +42,7 @@ public class GitRepository {
   private final Path revisedFilesPath;
   private final Path previousFilesPath;
   private final Path difffEntriesPath;
+  private final String projectName;
 
   private final Map<String, String> tooLongFileNames = new HashMap<>();
 
@@ -54,6 +50,7 @@ public class GitRepository {
    * Creates a new GitRepository with a correct local path of a git repository.
    */
   public GitRepository(String projectName) {
+    this.projectName = projectName;
     this.revisedFilesPath = Path.of(Configuration.getCommitDiffPath(), projectName, "revFiles");
     this.previousFilesPath = Path.of(Configuration.getCommitDiffPath(), projectName, "prevFiles");
     this.difffEntriesPath = Path.of(Configuration.getCommitDiffPath(), projectName, "DiffEntries");
@@ -64,10 +61,13 @@ public class GitRepository {
    *
    * @throws IOException
    */
-  public void open(Path repositoryPath) throws IOException {
-    FileHelper.createDirectory(this.revisedFilesPath);
-    FileHelper.createDirectory(this.previousFilesPath);
-    FileHelper.deleteFile(this.difffEntriesPath);
+  public void open() throws IOException {
+    File projectPath = Path.of(Configuration.getReposRootPath(), projectName).toFile();
+    Path repositoryPath = Path.of(projectPath.getAbsolutePath(), ".git");
+
+    FileHelper.createDirectory(revisedFilesPath);
+    FileHelper.createDirectory(previousFilesPath);
+    FileHelper.deleteFile(difffEntriesPath);
     File repoDirectory = repositoryPath.toFile();
 
     FileRepositoryBuilder fileRepositoryBuilder = new FileRepositoryBuilder()

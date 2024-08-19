@@ -22,10 +22,6 @@ public class Configuration {
 		}
 	}
 
-	public static String getReposRootPath() {
-		return SingletonHelper.INSTANCE.properties.getProperty("repos.root.path");
-	}
-
 	public static String getOutputPath() {
 		return SingletonHelper.INSTANCE.properties.getProperty("data.output.path");
 	}

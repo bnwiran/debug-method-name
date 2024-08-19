@@ -1,22 +1,8 @@
 package edu.lu.uni.serval.renamed.methods;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-
 import com.github.gumtreediff.actions.model.Action;
 import com.github.gumtreediff.actions.model.Update;
 import com.github.gumtreediff.tree.ITree;
-
 import edu.lu.uni.serval.diffentry.DiffEntryHunk;
 import edu.lu.uni.serval.diffentry.DiffEntryReader;
 import edu.lu.uni.serval.gumtree.GumTreeComparer;
@@ -29,15 +15,33 @@ import edu.lu.uni.serval.utils.Checker;
 import edu.lu.uni.serval.utils.FileHelper;
 import edu.lu.uni.serval.utils.MapSorter;
 import edu.lu.uni.serval.utils.Tokenizer;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import scala.concurrent.java8.FuturesConvertersImpl;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public class CodeChangeParser {
 	
-	private List<String> renamedMethods = new ArrayList<>();
-	private StringBuilder methodBodies = new StringBuilder();
+	private final List<String> renamedMethods = new ArrayList<>();
+	private final StringBuilder methodBodies = new StringBuilder();
 
 	public void parse(File revFile, File prevFile, File diffentryFile) {
 		List<Action> gumTreeResults = new GumTreeComparer().compareTwoFilesWithGumTree(prevFile, revFile);
-		if (gumTreeResults != null && gumTreeResults.size() != 0) {
+		if (Objects.nonNull(gumTreeResults) && !gumTreeResults.isEmpty()) {
 			List<HierarchicalActionSet> allActionSets = new HierarchicalRegrouper().regroupGumTreeResults(gumTreeResults);
 			
 			Map<HierarchicalActionSet, HierarchicalActionSet> renamedMethodsActionSets = new HashMap<>();
@@ -65,7 +69,7 @@ public class CodeChangeParser {
 				}
 			}
 			
-			if (renamedMethodsActionSets.size() > 0) {
+			if (!renamedMethodsActionSets.isEmpty()) {
 				MapSorter<Integer, HierarchicalActionSet> mapSorter = new MapSorter<>();
 				delActionSets = mapSorter.sortByKeyAscending(delActionSets);
 				insActionSets = mapSorter.sortByKeyAscending(insActionSets);
@@ -114,17 +118,10 @@ public class CodeChangeParser {
 							// Get the return type, arguments and  tokens of method bodies.
 							String tokens = readTokensOfMethodBody(actionSet, revUnit, revFile);
 							
-							if (tokens != null) {
-								this.renamedMethods.add(newCommitId + ":" +filePath + ":" + oldMethodName + "@" + parsedOldMethodName + ":" + newMethodName + "@" + parsedNewMethodName + ":" + bugStartLine + ":" + fixStartLine + ":" + tokens);
-//								System.out.println(newCommitId + ":" +filePath + ":" + oldMethodName + "@" + parsedOldMethodName + ":" + newMethodName + "@" + parsedNewMethodName + ":" + bugStartLine + ":" + fixStartLine + ":" + tokens);
-							} else {
-//								System.err.println("Empty method body: " + revFile.toString());
+							if (Objects.nonNull(tokens)) {
+								renamedMethods.add(newCommitId + ":" +filePath + ":" + oldMethodName + "@" + parsedOldMethodName + ":" + newMethodName + "@" + parsedNewMethodName + ":" + bugStartLine + ":" + fixStartLine + ":" + tokens);
 							}
-						} else {
-//							System.err.println("Null diff entry: " + revFile.toString());
 						}
-					} else {
-//						System.err.println("FEATURES CHANGING: " + revFile.toString());
 					}
 				}
 			} else {
@@ -137,33 +134,15 @@ public class CodeChangeParser {
 			prevFile.delete();
 			diffentryFile.delete();
 		}
-		
-//		if (this.renamedMethods.size() == 0) {
-//			revFile.delete();
-//			prevFile.delete();
-//			diffentryFile.delete();
-//		}
 	}
 	
 	private String parseMethodName(String methodName) {
 		String[] subTokensArray = StringUtils.splitByCharacterTypeCamelCase(methodName);
-		String subTokens = "";
-		int length = subTokensArray.length;
-		for (int i = 0; i < length; i ++) {
-			String subToken = subTokensArray[i];
-			if ("_".equals(subToken)) {// remove underscore.
-				continue;
-			} else if (NumberUtils.isDigits(subToken)) {// remove numeric letter.
-				continue;
-			}
-			subTokens += subToken + ",";
-		}
-		if ("".equals(subTokens)) {
-			System.err.println(methodName);
-			return null;
-		}
-		subTokens = subTokens.substring(0, subTokens.length() - 1);
-		return subTokens;
+		String methodTokens = Arrays.stream(subTokensArray)
+			.filter(token -> !"_".equals(token) && !NumberUtils.isDigits(token))
+			.collect(Collectors.joining(","));
+
+		return methodTokens.isEmpty() ? null : methodTokens;
 	}
 
 	private String readTokensOfMethodBody(HierarchicalActionSet actionSet, CompilationUnit cu, File sourceCodeFile) {
@@ -172,18 +151,12 @@ public class CodeChangeParser {
 		ITree newMethodTree = ((Update)actionSet.getAction()).getNewNode();
 		String tokensOfNewMethod = readTokensOfMethodBody(newMethodTree);
 		
-		if (tokensOfOldMethod == null) {
-//			System.err.println(sourceCodeFile.getPath());
-//			System.err.println(cu.getLineNumber(methodTree.getPos()) + "======" + cu.getLineNumber(methodTree.getPos() + methodTree.getLength()));
+		if (Objects.isNull(tokensOfOldMethod) || Objects.isNull(tokensOfNewMethod)) {
 			return null;
 		}
-		if (tokensOfNewMethod == null) {
-//			System.err.println(sourceCodeFile.getPath());
-//			System.err.println(cu.getLineNumber(newMethodTree.getPos()) + "======" + cu.getLineNumber(newMethodTree.getPos() + newMethodTree.getLength()));
-			return null;
-		}
+
 		if (tokensOfOldMethod.equals(tokensOfNewMethod)) {
-			this.methodBodies.append(readMethodBody(sourceCodeFile, cu.getLineNumber(newMethodTree.getPos()), cu.getLineNumber(newMethodTree.getPos() + newMethodTree.getLength())));
+			methodBodies.append(readMethodBody(sourceCodeFile, cu.getLineNumber(newMethodTree.getPos()), cu.getLineNumber(newMethodTree.getPos() + newMethodTree.getLength())));
 			return tokensOfOldMethod;
 		}
 		return null;
@@ -191,21 +164,16 @@ public class CodeChangeParser {
 	
 	private StringBuilder readMethodBody(File sourceCodeFile, int startLine, int endLine) {
 		StringBuilder method = new StringBuilder("#METHOD_BODY#========================\n\n");
-		String content = FileHelper.readFile(sourceCodeFile);
-		BufferedReader reader = new BufferedReader(new StringReader(content));
+
 		try {
-			String line = null;
-			int lineNum = 0;
-			while ((line = reader.readLine()) != null) {
-				lineNum ++;
-				if (startLine <= lineNum && lineNum <= endLine) {
-					method.append(line).append("\n");
-				}
+			List<String> codeLines = Files.readAllLines(sourceCodeFile.toPath()).subList(startLine-1, endLine);
+			for (String line : codeLines) {
+				method.append(line).append("\n");
 			}
-			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		method.append("\n\n");
 		return method;
 	}
@@ -232,24 +200,22 @@ public class CodeChangeParser {
 		List<SimpleTree> childrenOfSimpleTree = new ArrayList<>();
 		
 		boolean isStmt = false;
-		for (int i = 0, size = children.size(); i < size; i ++) {
-			ITree child = children.get(i);
-			if (isStmt) { // The statements in the method body.
-				SimpleTree stmt = new SimplifyTree().canonicalizeSourceCodeTree(child, simpleTree);
-				childrenOfSimpleTree.add(stmt);
-			} else if (Checker.isStatement(child.getType())) {
+    for (ITree child : children) {
+			if (Checker.isStatement(child.getType())) {
 				isStmt = true;
+			}
+
+			if (isStmt) {
 				SimpleTree stmt = new SimplifyTree().canonicalizeSourceCodeTree(child, simpleTree);
 				childrenOfSimpleTree.add(stmt);
 			}
-		}
+    }
 		
-		if (childrenOfSimpleTree.size() == 0) {
+		if (childrenOfSimpleTree.isEmpty()) {
 			return null;
 		}
 		simpleTree.setChildren(childrenOfSimpleTree);
-		String tokens = returnType + ":" + arguments + ":" + Tokenizer.getTokensDeepFirst(simpleTree).trim();
-		return tokens;
+    return returnType + ":" + arguments + ":" + Tokenizer.getTokensDeepFirst(simpleTree).trim();
 	}
 
 	/**
@@ -271,18 +237,18 @@ public class CodeChangeParser {
 		ITree newNode = update.getNewNode();
 		int fixStartPosition = newNode.getPos();
 		int fixEndPosition = fixStartPosition + newNode.getLength();
-		if (hasActionSet(fixStartPosition, fixEndPosition, insActionSets)) {
-			return true;
-		}
-		
-		return false;
-	}
+
+    return hasActionSet(fixStartPosition, fixEndPosition, insActionSets);
+  }
 
 	private boolean hasActionSet(int startPosition, int endPosition,
 			Map<Integer, HierarchicalActionSet> actionSets) {
 		for (Map.Entry<Integer, HierarchicalActionSet> entry : actionSets.entrySet()) {
 			int start = entry.getKey();
-			if (start > endPosition) break;
+			if (start > endPosition) {
+				break;
+			}
+
 			int end = start + entry.getValue().getLength();
 			if (startPosition <= start && end <= endPosition) {
 				return true;
@@ -297,20 +263,19 @@ public class CodeChangeParser {
 		 * 2. The method body has no any changes.
 		 */
 		if (bugSL > 0) {
-			for (int index = 0, hunkListSize = diffentryHunks.size(); index < hunkListSize; index ++) {
-				DiffEntryHunk hunk = diffentryHunks.get(index);
-				int bugStartLine = hunk.getBugLineStartNum();
-				int bugEndLine = bugStartLine + hunk.getBugRange() - 1;
-				if (bugSL > bugEndLine) continue;
-				if (bugEL < bugStartLine) break;
-				
-				int fixStartLine = hunk.getFixLineStartNum();
-				int fixEndLine = fixStartLine + hunk.getFixRange() - 1;
-				if (bugStartLine <= bugSL && bugEL <= bugEndLine
-						&& fixStartLine <= fixSL && fixEL <= fixEndLine) {
-					return true;
-				}
-			}
+      for (DiffEntryHunk hunk : diffentryHunks) {
+        int bugStartLine = hunk.getBugLineStartNum();
+        int bugEndLine = bugStartLine + hunk.getBugRange() - 1;
+        if (bugSL > bugEndLine) continue;
+        if (bugEL < bugStartLine) break;
+
+        int fixStartLine = hunk.getFixLineStartNum();
+        int fixEndLine = fixStartLine + hunk.getFixRange() - 1;
+        if (bugStartLine <= bugSL && bugEL <= bugEndLine
+          && fixStartLine <= fixSL && fixEL <= fixEndLine) {
+          return true;
+        }
+      }
 		}
 		
 		return false;

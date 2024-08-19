@@ -204,7 +204,7 @@ public class HierarchicalActionSet implements Comparable<HierarchicalActionSet> 
 	@Override
 	public String toString() {
 		String str = actionString;
-		if (strList.size() == 0) {
+		if (strList.isEmpty()) {
 			strList.add(str);
 			for (HierarchicalActionSet actionSet : subActions) {
 				actionSet.toString();
@@ -245,7 +245,7 @@ public class HierarchicalActionSet implements Comparable<HierarchicalActionSet> 
 	}
 	
 	public String toRawCodeLevelAction() {
-		if (strList.size() == 0) {
+		if (strList.isEmpty()) {
 			toString();
 		}
 		String astNodeStr = "";

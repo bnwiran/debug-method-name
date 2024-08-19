@@ -115,9 +115,12 @@ public class FileHelper {
     outputToFile(fileName, data.toString(), append);
   }
 
+  public static void outputToFile(Path path, StringBuilder data, boolean append) {
+    outputToFile(path.toFile(), data.toString(), append);
+  }
+
   public static void outputToFile(String fileName, String data, boolean append) {
-    File file = new File(fileName);
-    outputToFile(file, data, append);
+    outputToFile(new File(fileName), data, append);
   }
 
   public static void outputToFile(File file, String data, boolean append) {

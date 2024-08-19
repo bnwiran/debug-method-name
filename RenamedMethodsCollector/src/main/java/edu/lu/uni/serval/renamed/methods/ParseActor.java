@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class ParseActor extends UntypedActor {
 
 		String projectName = inputProjectPath.substring(inputProjectPath.lastIndexOf(File.separatorChar) + 1);
 		travelRouter = this.getContext().actorOf(new RoundRobinPool(numberOfWorkers)
-				.props(ParseWorker.props(this.outputPath, projectName)), "parse-router");
+				.props(ParseWorker.props(outputPath, projectName)), "parse-router");
 	}
 
 	public static Props props(final String rootPath, final String outputPath) {
@@ -52,52 +53,60 @@ public class ParseActor extends UntypedActor {
 		});
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onReceive(Object msg) throws Throwable {
 		if (msg instanceof String && "BEGIN".equals(msg.toString())) {
 			FileHelper.deleteFile(outputPath);
-			List<File> allRevFiles = Arrays.asList(Path.of(inputProjectPath, "revFiles").toFile().listFiles());
+
+			File[] files = Path.of(inputProjectPath, "revFiles").toFile().listFiles();
+			List<File> allRevFiles = Objects.nonNull(files) ? Arrays.asList(files) : List.of();
+
 			if (allRevFiles.isEmpty()) {
-				System.out.println(inputProjectPath);
-				this.getContext().stop(travelRouter);
-				this.getContext().stop(getSelf());
-				this.getContext().system().shutdown();
+				shutdown();
+				return;
 			}
 
-			int size = allRevFiles.size();
-			if (size < numberOfWorkers) {
-				numberOfWorkers = size;
-			}
-			int average = size / numberOfWorkers;
-			int remainder = size % numberOfWorkers;
-			int index = 0;
-			for (int i = 0; i < numberOfWorkers; i ++) {
-				int beginIndex = i * average + index;
-				if (index < remainder) {
-					index ++;
-				}
-				int endIndex = (i + 1) * average + index;
-
-        List<File> msgFilesOfWorker = new ArrayList<>(allRevFiles.subList(beginIndex, endIndex));
-				MessageFiles messageFiles = new MessageFiles(i + 1);
-				messageFiles.setRevFiles(msgFilesOfWorker);
-				travelRouter.tell(messageFiles, getSelf());
-        log.debug("Assign a task to worker #{}...", i + 1);
-			}
+			tell(allRevFiles);
 		} else if (msg instanceof String && "END".equals(msg.toString())) {
 			number++;
       log.debug("{} workers finished their work...", number);
 			if (number == numberOfWorkers) {
-				mergeData(); // Merge data.
-				RenamedMethodsFilter.filteroutTyposByParsedMethodNames(outputPath);
+				mergeData();
+				RenamedMethodsFilter.filterOutTyposByParsedMethodNames(outputPath);
 				log.info("All workers finished their work...");
-				this.getContext().stop(travelRouter);
-				this.getContext().stop(getSelf());
-				this.getContext().system().shutdown();
+				shutdown();
 			}
 		} else {
 			unhandled(msg);
+		}
+	}
+
+	private void shutdown() {
+		this.getContext().stop(travelRouter);
+		this.getContext().stop(getSelf());
+		this.getContext().system().terminate();
+	}
+
+	private void tell(List<File> filesList) {
+		int size = filesList.size();
+		if (size < numberOfWorkers) {
+			numberOfWorkers = size;
+		}
+		int average = size / numberOfWorkers;
+		int remainder = size % numberOfWorkers;
+		int index = 0;
+		for (int i = 0; i < numberOfWorkers; i++) {
+			int beginIndex = i * average + index;
+			if (index < remainder) {
+				index++;
+			}
+			int endIndex = (i + 1) * average + index;
+
+			List<File> msgFilesOfWorker = new ArrayList<>(filesList.subList(beginIndex, endIndex));
+			MessageFiles messageFiles = new MessageFiles(i + 1);
+			messageFiles.setRevFiles(msgFilesOfWorker);
+			travelRouter.tell(messageFiles, getSelf());
+			log.debug("Assign a task to worker #{}...", i + 1);
 		}
 	}
 

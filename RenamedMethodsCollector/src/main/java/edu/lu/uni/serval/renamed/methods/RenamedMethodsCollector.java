@@ -43,13 +43,9 @@ public class RenamedMethodsCollector {
   }
 
   private static void parseRenamedMethods(String inputProject, String outputPath) {
-    try {
-      ActorSystem system = ActorSystem.create("methodNames-system");
-      ActorRef gitTravelActor = system.actorOf(ParseActor.props(inputProject, outputPath), "parse-actor");
-      gitTravelActor.tell("BEGIN", ActorRef.noSender());
-    } catch (Exception e) {
-      log.error(e.getMessage());
-    }
+    ActorSystem system = ActorSystem.create("methodNames-system");
+    ActorRef gitTravelActor = system.actorOf(ParseActor.props(inputProject, outputPath), "parse-actor");
+    gitTravelActor.tell("BEGIN", ActorRef.noSender());
   }
 
 }

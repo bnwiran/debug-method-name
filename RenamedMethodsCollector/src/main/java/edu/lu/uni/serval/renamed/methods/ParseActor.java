@@ -28,15 +28,13 @@ public class ParseActor extends UntypedActor {
 	private final String outputPath;
   private final ActorRef travelRouter;
 	private int numberOfWorkers = 500;
-	int number = 0;
-	int startIndex = 0;
-	int endIndex = 0;
-	//lucene-solr
+	private int number = 0;
+
 	public ParseActor(String inputProjectPath, String outputPath) {
 		this.inputProjectPath = inputProjectPath;
-    String projectName = inputProjectPath.substring(inputProjectPath.lastIndexOf(File.separatorChar) + 1);
 		this.outputPath = outputPath;
-		
+
+		String projectName = inputProjectPath.substring(inputProjectPath.lastIndexOf(File.separatorChar) + 1);
 		travelRouter = this.getContext().actorOf(new RoundRobinPool(numberOfWorkers)
 				.props(ParseWorker.props(this.outputPath, projectName)), "parse-router");
 	}
@@ -59,20 +57,15 @@ public class ParseActor extends UntypedActor {
 	public void onReceive(Object msg) throws Throwable {
 		if (msg instanceof String && "BEGIN".equals(msg.toString())) {
 			FileHelper.deleteFile(outputPath);
-			List<File> allRevFiles1 = Arrays.asList(Path.of(inputProjectPath, "revFiles").toFile().listFiles());
-			if (allRevFiles1.isEmpty() || startIndex >= allRevFiles1.size()) {
+			List<File> allRevFiles = Arrays.asList(Path.of(inputProjectPath, "revFiles").toFile().listFiles());
+			if (allRevFiles.isEmpty()) {
 				System.out.println(inputProjectPath);
 				this.getContext().stop(travelRouter);
 				this.getContext().stop(getSelf());
 				this.getContext().system().shutdown();
 			}
-			if (endIndex == 0 || endIndex > allRevFiles1.size()) {
-				endIndex = allRevFiles1.size();
-			}
 
-			List<File> allRevFiles = allRevFiles1.subList(startIndex, endIndex);
 			int size = allRevFiles.size();
-			
 			if (size < numberOfWorkers) {
 				numberOfWorkers = size;
 			}
@@ -81,7 +74,9 @@ public class ParseActor extends UntypedActor {
 			int index = 0;
 			for (int i = 0; i < numberOfWorkers; i ++) {
 				int beginIndex = i * average + index;
-				if (index < remainder) index ++;
+				if (index < remainder) {
+					index ++;
+				}
 				int endIndex = (i + 1) * average + index;
 
         List<File> msgFilesOfWorker = new ArrayList<>(allRevFiles.subList(beginIndex, endIndex));
@@ -91,7 +86,7 @@ public class ParseActor extends UntypedActor {
         log.debug("Assign a task to worker #{}...", i + 1);
 			}
 		} else if (msg instanceof String && "END".equals(msg.toString())) {
-			number ++;
+			number++;
       log.debug("{} workers finished their work...", number);
 			if (number == numberOfWorkers) {
 				mergeData(); // Merge data.
@@ -168,9 +163,8 @@ public class ParseActor extends UntypedActor {
 		FileHelper.outputToFile(newMethodNamesFile, newMethodNames, false);
 		newMethodNames.setLength(0);
 
-		String path = outputPath + "/RenamedMethods/";
-		FileHelper.deleteFile(path);
-		FileHelper.deleteFile(outputPath + "/MethodBodies/");
+		FileHelper.deleteFile(Path.of(outputPath, "RenamedMethods"));
+		FileHelper.deleteFile(Path.of(outputPath, "MethodBodies"));
 	}
 
 }

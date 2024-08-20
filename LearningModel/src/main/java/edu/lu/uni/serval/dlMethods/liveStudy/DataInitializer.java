@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -79,7 +80,7 @@ public class DataInitializer {
 
 	private List<Integer> readSizes(String sizesFile) throws IOException {
 		List<Integer> sizesList = new ArrayList<>();
-		String sizesContent = FileHelper.readFile(sizesFile);
+		String sizesContent = FileHelper.readFile(Path.of(sizesFile).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(sizesContent));
 		String line = null;
 		while ((line = reader.readLine()) != null) {
@@ -95,9 +96,7 @@ public class DataInitializer {
 	 * Randomly select training data and testing data.
 	 * Training data: 90%.
 	 * Testing data: 10%.
-	 * 
-	 * @param inputPath
-	 * @param outputPath
+	 *
 	 * @throws IOException
 	 */
 	public void selectTrainingAndTestingData() throws IOException {

@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -106,7 +107,7 @@ public class MethodNameFeatureLearner {
 
 	private List<String> readFile(String methodNameTokensFile) throws IOException {
 		List<String> methodNames = new ArrayList<>();
-		String content = FileHelper.readFile(methodNameTokensFile);
+		String content = FileHelper.readFile(Path.of(methodNameTokensFile).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		while ((line = reader.readLine()) != null) {
@@ -139,8 +140,8 @@ public class MethodNameFeatureLearner {
 		
 		FileHelper.outputToFile(featureLearningData1, builder, false);
 		FileHelper.outputToFile(featureLearningData1 + ".bak", builder, false);
-		String content = FileHelper.readFile(testingMethodNamesFile);
-		String contentBak = FileHelper.readFile(testingMethodNamesFile + ".bak");
+		String content = FileHelper.readFile(Path.of(testingMethodNamesFile).toFile());
+		String contentBak = FileHelper.readFile(Path.of(testingMethodNamesFile + ".bak").toFile());
 		FileHelper.outputToFile(featureLearningData1, content, true);
 		FileHelper.outputToFile(featureLearningData1 + ".bak", contentBak, true);
 		
@@ -154,7 +155,7 @@ public class MethodNameFeatureLearner {
 		List<String> tokensList = readTokensList(content);
 		List<String> tokensListBak = readTokensList(contentBak);
 		
-		BufferedReader reader = new BufferedReader(new StringReader(FileHelper.readFile(returnTypeOfTestingFile)));
+		BufferedReader reader = new BufferedReader(new StringReader(FileHelper.readFile(Path.of(returnTypeOfTestingFile).toFile())));
 		int index = 0;
 		String line = null;
 		while ((line = reader.readLine()) != null) {

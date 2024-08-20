@@ -3,6 +3,7 @@ package edu.lu.uni.serval.dlMethods.DataPrepare;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +40,7 @@ public class CommonFirstTokens {
 	 */
 	public void readTokens() throws IOException {
 		String parsedMethodNamesFile = inputPath + "ParsedMethodNames.txt";
-		String content = FileHelper.readFile(parsedMethodNamesFile);
+		String content = FileHelper.readFile(Path.of(parsedMethodNamesFile).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		StringBuilder builder = new StringBuilder();
@@ -91,7 +92,6 @@ public class CommonFirstTokens {
 
 	/**
 	 * Export the distribution of first tokens to a file, and select the common first tokens by the threshold of QUANTITY.
-	 * @param outputPath
 	 */
 	public void outputTokens() {
 		StringBuilder builder = new StringBuilder("Token,Number\n");

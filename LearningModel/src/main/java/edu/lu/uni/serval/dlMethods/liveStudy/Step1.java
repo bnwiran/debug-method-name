@@ -18,7 +18,7 @@ public class Step1 {
 	public static void main(String[] args) throws IOException {
 		String inputPath = Configuration.TOKENIZED_METHODS_PATH;
 		String outputPath = Configuration.ROOT_PATH + "LiveStudy/";
-		FileHelper.deleteDirectory(outputPath);
+		FileHelper.deleteFile(outputPath);
 		
 		/**
 		 * Prepare data:

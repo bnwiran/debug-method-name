@@ -37,7 +37,7 @@ public class Step3 {
 
 		int nEpochs = Integer.valueOf(args[1]);//1, 10, 20
 		String outputPath = rootPath + "DLoutput_" + nEpochs + "/";
-		FileHelper.deleteDirectory(outputPath);
+		FileHelper.deleteFile(outputPath);
 		
 		int sizeOfTokensVector = maxSize;
 		int sizeOfEmbeddedVector = 300;

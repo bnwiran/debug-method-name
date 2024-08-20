@@ -3,6 +3,7 @@ package edu.lu.uni.serval.dlMethods;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +32,10 @@ public class TokensEmbedder {
 		String embeddingInputData = inputPath + "embedding/inputData.txt";
 		
 		// merge source code tokens of fixed violations.
-		FileHelper.outputToFile(embeddingInputData, FileHelper.readFile(methodTokens), false);
+		FileHelper.outputToFile(embeddingInputData, FileHelper.readFile(Path.of(methodTokens).toFile()), false);
 		if (mergeData) {
 			String renamedTokens = inputPath + "RenamedMethods/MethodTokens.txt";
-			FileHelper.outputToFile(embeddingInputData, FileHelper.readFile(renamedTokens), true);
+			FileHelper.outputToFile(embeddingInputData, FileHelper.readFile(Path.of(renamedTokens).toFile()), true);
 		}
 	}
 	

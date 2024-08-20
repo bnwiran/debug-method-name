@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -89,7 +90,7 @@ public class DataInitializer {
 			for (String project : projects) {
 				String sizeFile = Configuration.TOKENIZED_METHODS_PATH + project + "/sizes.csv";
 				if (! new File(sizeFile).exists()) continue;
-				FileHelper.outputToFile(sizesFile, FileHelper.readFile(sizeFile), true);
+				FileHelper.outputToFile(sizesFile, FileHelper.readFile(Path.of(sizeFile).toFile()), true);
 			}
 		}
 		
@@ -112,7 +113,6 @@ public class DataInitializer {
 
 	/**
 	 * Select methods to get the indexes for selecting methods.
-	 * @param outputPath
 	 * @throws IOException 
 	 */
 	public void selectMethod() throws IOException {

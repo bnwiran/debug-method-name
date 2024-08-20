@@ -16,7 +16,7 @@ public class EmbedCodeTokens {
 	public static void main(String[] args) throws IOException {
 		String inputPath = Configuration.DL_DATA_PATH;
 		String outputPath = Configuration.DL_INPUT_DATA_PATH;
-		FileHelper.deleteDirectory(outputPath);
+		FileHelper.deleteFile(outputPath);
 		
 		TokensEmbedder embedder = new TokensEmbedder();
 		embedder.inputPath = inputPath;

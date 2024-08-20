@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -23,7 +24,6 @@ public class RenamedMethodSelector {
 	
 	/**
 	 * Select renamed methods by their first tokens and sizes.
-	 * @param renamedMethodsPath
 	 * @throws IOException 
 	 */
 	public void selectRenamedMethods(List<String> commonFirstTokens,
@@ -89,7 +89,7 @@ public class RenamedMethodSelector {
 	
 	public List<Integer> readSizes(String sizesFile) throws IOException {
 		List<Integer> sizesList = new ArrayList<>();
-		String sizesContent = FileHelper.readFile(sizesFile);
+		String sizesContent = FileHelper.readFile(Path.of(sizesFile).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(sizesContent));
 		String line = null;
 		while ((line = reader.readLine()) != null) {
@@ -102,7 +102,7 @@ public class RenamedMethodSelector {
 
 	private List<String> readFirstTokens(String parsedMethodNamesFile, List<String> parsedMethodNames) throws IOException {
 		List<String> firstTokens = new ArrayList<>();
-		String content = FileHelper.readFile(parsedMethodNamesFile);
+		String content = FileHelper.readFile(Path.of(parsedMethodNamesFile).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		while ((line = reader.readLine()) != null) {

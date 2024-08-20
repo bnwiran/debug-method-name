@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.Map;
 
 import edu.lu.uni.Configuration;
@@ -26,7 +27,7 @@ public class App1 {
 		String trainingData = inputPath + "SelectedData/SelectedMethodTokens.txt";  // SelectedSizes.csv, SelectedMethodTokens.txt, SelectedMethodInfo.txt
 		String testingData = inputPath + "RenamedMethods/MethodTokens.txt"; // MethodTokens.txt, MethodInfo.txt, ParsedMethodNames.txt
 		String outputPath = rootPath + "Detect_Data/";
-		FileHelper.deleteDirectory(outputPath);
+		FileHelper.deleteFile(outputPath);
 
 		vectorizedData(inputPath, outputPath, new File(trainingData), new File(testingData), inputPath + "SelectedData/SelectedSizes.csv");
 		
@@ -102,7 +103,7 @@ public class App1 {
 	
 	private static int readMaxSize(String sizesFile) throws IOException {
 		int maxSize = 0;
-		String sizesContent = FileHelper.readFile(sizesFile);
+		String sizesContent = FileHelper.readFile(Path.of(sizesFile).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(sizesContent));
 		String line = null;
 		while ((line = reader.readLine()) != null) {

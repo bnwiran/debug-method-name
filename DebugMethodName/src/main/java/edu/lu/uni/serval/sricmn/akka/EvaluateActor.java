@@ -510,7 +510,7 @@ public class EvaluateActor extends UntypedActor {
 	}
 
 	private void readRenamedMethodTokens(String fileName) throws IOException {
-		String content = FileHelper.readFile(fileName);
+		String content = FileHelper.readFile(new File(fileName));
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		while ((line = reader.readLine()) != null) {

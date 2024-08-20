@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +31,14 @@ public class MainParser {
 			 * It needs to merge all output data if using this choice.
 			 * 
 			 */
-			List<String> projectNames = readProjects();
-			int i = Integer.valueOf(args[0]); // 0 - 429: 430 Java projects.
-			if (i >= projectNames.size()) {
+			String reposFileName = args[0];
+			List<String> projects = readList(reposFileName);
+			int i = Integer.parseInt(args[1]); // 0 - 429: 430 Java projects.
+			if (i >= projects.size()) {
 				System.out.println("Wrong parameter: " + args[0]);
 				return;
 			}
-			String projectName = projectNames.get(i);
+			String projectName = projects.get(i);
 			String project = Configuration.JAVA_FILES_PATH + projectName + ".txt";
 			if (! new File(project).exists()) {
 				project = Configuration.JAVA_REPOS_PATH + projectName;
@@ -56,7 +59,7 @@ public class MainParser {
 
 		String outputPath = Configuration.TOKENIZED_METHODS_PATH;
 		// Clear existing output data generated at the last time.
-		FileHelper.deleteDirectory(outputPath);
+		FileHelper.deleteFile(outputPath);
 
 		MethodParser mp = new MethodParser();
 		mp.parseProjects(projects, outputPath);
@@ -74,7 +77,7 @@ public class MainParser {
 
 		String outputPath = Configuration.TOKENIZED_METHODS_PATH;
 		// Clear existing output data generated at the last time.
-		FileHelper.deleteDirectory(outputPath);
+		FileHelper.deleteFile(outputPath);
 
 		int numberOfWorkers = 430;
 		MultipleShreadParser parser = new MultipleShreadParser(projects, outputPath, numberOfWorkers);
@@ -103,21 +106,14 @@ public class MainParser {
 		MultipleShreadParser parser = new MultipleShreadParser(project, outputPath, numberOfWorkers);
 		parser.parseMethods();
 	}
-	
-	private static List<String> readProjects() throws IOException {
-		String content = FileHelper.readFile(Configuration.JAVA_REPO_NAMES_FILE);
-		List<String> list = new ArrayList<>();
-		BufferedReader reader = new BufferedReader(new StringReader(content));
-		try {
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				list.add(line);
-			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return list;
+
+	private static List<String> readList(String reposFileName) throws IOException {
+		return Files.readAllLines(Path.of(reposFileName).toAbsolutePath()).stream()
+			.map(line -> line.split("/"))
+			.map(line -> {
+				int index = line[line.length - 1].indexOf(".git");
+				return line[line.length - 1].substring(0, index);
+			}).toList();
 	}
 	
 }

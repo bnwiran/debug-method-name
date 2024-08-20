@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Configuration {
 	
-	private static final String ROOT_PATH = "../Data/";
+	private static final String ROOT_PATH = "Data/";
 	// Data paths of Java method parsing.
 	public static final String JAVA_REPOS_PATH = ROOT_PATH + "JavaRepos/";
 	public static final String JAVA_REPO_NAMES_FILE = JAVA_REPOS_PATH + "repos.txt";

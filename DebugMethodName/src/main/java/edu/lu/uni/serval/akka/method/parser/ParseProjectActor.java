@@ -1,31 +1,32 @@
 package edu.lu.uni.serval.akka.method.parser;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import akka.routing.RoundRobinPool;
 import edu.lu.uni.serval.utils.FileHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.Serial;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 public class ParseProjectActor extends UntypedActor {
 	
-	private static Logger logger = LoggerFactory.getLogger(ParseProjectActor.class);
+	private static final Logger logger = LoggerFactory.getLogger(ParseProjectActor.class);
 
-	private ActorRef travelRouter;
+	private final ActorRef travelRouter;
 	private int numberOfWorkers;
 	private int counter = 0;
-	private int numberOfTokenTypes = 1;
-	
-	private int totalityOfMethods = 0;
+
+  private int totalityOfMethods = 0;
 	private int totalityOfNonNullMethods = 0;
 	private String outputPath;
 	
@@ -39,19 +40,19 @@ public class ParseProjectActor extends UntypedActor {
 		
 		return Props.create(new Creator<ParseProjectActor>() {
 
+			@Serial
 			private static final long serialVersionUID = 9207427376110704705L;
 
 			@Override
-			public ParseProjectActor create() throws Exception {
+			public ParseProjectActor create() {
 				return new ParseProjectActor(numberOfWorkers);
 			}
 			
 		});
 	}
-	
-	@SuppressWarnings("deprecation")
+
 	@Override
-	public void onReceive(Object message) throws Exception {
+	public void onReceive(Object message) {
 		if (message instanceof ProjectsMessage) {
 			logger.info("****************Start to parse methods****************\n");
 			ProjectsMessage projMsg = (ProjectsMessage) message;
@@ -81,7 +82,7 @@ public class ParseProjectActor extends UntypedActor {
 				if (project.endsWith(".txt")) {
 					// Parse methods Java-code-file by Java-code-file.
 					List<String> javaFiles;
-					String content = FileHelper.readFile(project);
+					String content = FileHelper.readFile(new File(project));
 					javaFiles = Arrays.asList(content.trim().split("\n"));
 					int size = javaFiles.size();
 					if (size < numberOfWorkers) {
@@ -126,9 +127,8 @@ public class ParseProjectActor extends UntypedActor {
 						if (i == numberOfWorkers - 1) {
 							toIndex = size;
 						}
-						
-						List<File> javaFilesOfWorkers = new ArrayList<>();
-						javaFilesOfWorkers.addAll(javaFiles.subList(fromIndex, toIndex));
+
+            List<File> javaFilesOfWorkers = new ArrayList<>(javaFiles.subList(fromIndex, toIndex));
 						ProjectsMessage pro = new ProjectsMessage(project, i + 1, outputPath);
 						pro.setJavaFiles(javaFilesOfWorkers);
 						travelRouter.tell(pro, getSelf());
@@ -143,18 +143,18 @@ public class ParseProjectActor extends UntypedActor {
 			totalityOfNonNullMethods += Integer.parseInt(elements[2]);
 			
 			counter ++;
-			logger.debug(counter + " workers finished their work...");
+      logger.debug("{} workers finished their work...", counter);
 			if (counter >= numberOfWorkers) {
-				// merge data.
+
 				mergeData();
 				logger.debug("All workers finished their work...");
 				
 				this.getContext().stop(travelRouter);
 				this.getContext().stop(getSelf());
-				this.getContext().system().shutdown();
-				
-				logger.info("****************Totality of all methods: " + totalityOfMethods);
-				logger.info("****************Totality of all non-empty methods: " + totalityOfNonNullMethods / this.numberOfTokenTypes);
+				this.getContext().system().terminate();
+
+        logger.info("****************Totality of all methods: {}", totalityOfMethods);
+        logger.info("****************Totality of all non-empty methods: {}", totalityOfNonNullMethods);
 				logger.info("****************Finish off parsing methods****************\n");
 			}
 		} else {
@@ -163,26 +163,29 @@ public class ParseProjectActor extends UntypedActor {
 	}
 	
 	private List<File> getAllFiles(File file, String type, int length) {
-		List<File> fileList = new ArrayList<>();
-		
 		if (!file.exists()) {
-			return null;
+			return List.of();
 		}
 		
 		File[] files = file.listFiles();
-		
-		for (File f : files) {
-			if (f.isFile()) { // Filter out test, sample, example, and template Java code files.
-				if (f.toString().endsWith(type)) {
-					String filePath = f.getPath();
-					filePath = filePath.substring(length).toLowerCase(Locale.ROOT);
-					if (filePath.contains("test") || filePath.contains("sample") || filePath.contains("example") || filePath.contains("template")) continue;
-					fileList.add(f);
-				}
-			} else {
-				List<File> fl = getAllFiles(f, type, length);
-				if (fl != null && fl.size() > 0) {
-					fileList.addAll(fl);
+		List<File> fileList = new ArrayList<>();
+
+		if (Objects.nonNull(files)) {
+			for (File f : files) {
+				if (f.isFile()) { // Filter out test, sample, example, and template Java code files.
+					if (f.getName().endsWith(type)) {
+						String filePath = f.getPath();
+						filePath = filePath.substring(length).toLowerCase(Locale.ROOT);
+						if (filePath.contains("test") || filePath.contains("sample") || filePath.contains("example") || filePath.contains("template")) {
+							continue;
+						}
+						fileList.add(f);
+					}
+				} else {
+					List<File> fl = getAllFiles(f, type, length);
+					if (Objects.nonNull(fl) && !fl.isEmpty()) {
+						fileList.addAll(fl);
+					}
 				}
 			}
 		}
@@ -202,13 +205,13 @@ public class ParseProjectActor extends UntypedActor {
 		FileHelper.deleteFile(outputFileName);
 		
 		for (int i = 1; i <= numberOfWorkers; i ++) {
-			File file = new File(outputPath + type + "/" + type + "_" + i + fileType);
+			File file = Path.of(outputPath + type,type + "_" + i + fileType).toFile();
 			if (file.exists()) {
-				FileHelper.outputToFile(outputFileName, FileHelper.readFile(outputPath + type + "/" + type + "_" + i + fileType), true);
+				FileHelper.outputToFile(outputFileName, FileHelper.readFile(Path.of(outputPath + type, type + "_" + i + fileType).toFile()), true);
 				file.delete();
 			}
 		}
-		new File(outputPath + type + "/").delete();
+		FileHelper.deleteFile(outputPath + type);
 	}
 
 }

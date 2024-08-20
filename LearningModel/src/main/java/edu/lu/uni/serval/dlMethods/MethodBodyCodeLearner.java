@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import edu.lu.uni.Configuration;
 import edu.lu.uni.serval.utils.FileHelper;
-import lombok.NonNull;
 
 /**
  * Feature learning.
@@ -84,7 +83,7 @@ public class MethodBodyCodeLearner {
 			learner.setTestingData(testingDataFile);
 			learner.extracteFeaturesWithCNNByLoadingModel();
 		} else {
-			FileHelper.deleteDirectory(outputPath);
+			FileHelper.deleteFile(outputPath);
 			
 			int sizeOfTokensVector = maxSize;
 			int sizeOfEmbeddedVector = 300;
@@ -306,7 +305,7 @@ public class MethodBodyCodeLearner {
 			log.info("****************Deep learning finished********************");
 		}
 		
-		public void writeModel(@NonNull Model model, @NonNull OutputStream stream, boolean saveUpdater)
+		public void writeModel(Model model, OutputStream stream, boolean saveUpdater)
                 throws IOException {
 		    ZipOutputStream zipfile = new ZipOutputStream(stream);
 		

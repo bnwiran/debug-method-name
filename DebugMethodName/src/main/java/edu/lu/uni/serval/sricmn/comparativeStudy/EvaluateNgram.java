@@ -1,6 +1,7 @@
 package edu.lu.uni.serval.sricmn.comparativeStudy;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 
@@ -15,7 +16,7 @@ public class EvaluateNgram {
 		int falsePositives = 0;
 		int truePositives = 0;
 		
-		String content = FileHelper.readFile("OUTPUT/N-gram.results");
+		String content = FileHelper.readFile(new File("OUTPUT/N-gram.results"));
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = reader.readLine();
 		while ((line = reader.readLine()) != null) {

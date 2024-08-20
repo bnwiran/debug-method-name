@@ -1,6 +1,7 @@
 package edu.lu.uni.serval.akka.method.parser;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import edu.lu.uni.serval.method.parser.util.MethodExporter;
 
 public class ParseProjectWorker extends UntypedActor {
 	
-	private static Logger log = LoggerFactory.getLogger(ParseProjectWorker.class);
+	private static final Logger log = LoggerFactory.getLogger(ParseProjectWorker.class);
 	
 	public ParseProjectWorker() {
 	}
@@ -25,10 +26,11 @@ public class ParseProjectWorker extends UntypedActor {
 	public static Props props() {
 		return Props.create(new Creator<ParseProjectWorker>() {
 
+			@Serial
 			private static final long serialVersionUID = -7615153844097275009L;
 
 			@Override
-			public ParseProjectWorker create() throws Exception {
+			public ParseProjectWorker create() {
 				return new ParseProjectWorker();
 			}
 			
@@ -37,9 +39,8 @@ public class ParseProjectWorker extends UntypedActor {
 
 	@Override
 	public void onReceive(Object message) throws Exception {
-		if (message instanceof ProjectsMessage) {
-			ProjectsMessage pro = (ProjectsMessage) message;
-			List<String> projects = pro.getProjects();
+		if (message instanceof ProjectsMessage pro) {
+      List<String> projects = pro.getProjects();
 			String outputPath = pro.getOutputPath();
 			int workerId = pro.getWorkerID();
 			

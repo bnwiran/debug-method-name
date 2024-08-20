@@ -135,4 +135,22 @@ public class FileHelper {
       e.printStackTrace();
     }
   }
+
+  public static String getFileNameWithoutExtension(File file) {
+    if (file.exists()) {
+      String fileName = file.getName();
+      fileName = fileName.substring(0, fileName.lastIndexOf("."));
+      return fileName;
+    } else {
+      return null;
+    }
+  }
+
+  public static void makeDirectory(String fileName) {
+    deleteFile(fileName);
+    File file = new File(fileName).getParentFile();
+    if (!file.exists()) {
+      file.mkdirs();
+    }
+  }
 }

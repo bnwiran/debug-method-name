@@ -3,6 +3,7 @@ package edu.lu.uni.serval;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -159,13 +160,13 @@ public class DataFilter {
 						indexes.add(index);
 						builder.append(line).append("\n");
 						if (index % 1000 == 0) {
-							FileHelper.outputToFile(tokensFileTmp, builder, true);
+							FileHelper.outputToFile(tokensFileTmp.toPath(), builder, true);
 							builder.setLength(0);
 						}
 					}
 					scanner.close();
 					fis.close();
-					FileHelper.outputToFile(tokensFileTmp, builder, true);
+					FileHelper.outputToFile(tokensFileTmp.toPath(), builder, true);
 					builder.setLength(0);
 					FileHelper.outputToFile(javaProjectPath + "/ParsedMethodNames.txt", parsedMethodNames, false);
 					tokensFile.delete();
@@ -263,13 +264,13 @@ public class DataFilter {
 			FileHelper.deleteFile(outputFileName);
 			
 			for (int i = 1; i <= 1000; i ++) {
-				File file = new File(javaProjectPath + "/" + type + "/" + type + "_" + i + fileType);
+				File file = Path.of(javaProjectPath,type, type + "_" + i + fileType).toFile();
 				if (file.exists()) {
-					FileHelper.outputToFile(outputFileName, FileHelper.readFile(javaProjectPath + "/" + type + "/" + type + "_" + i + fileType), true);
+					FileHelper.outputToFile(outputFileName, FileHelper.readFile(Path.of(javaProjectPath , type, type + "_" + i + fileType).toFile()), true);
 					file.delete();
 				}
 			}
-			FileHelper.deleteDirectory(javaProjectPath + "/" + type);
+			FileHelper.deleteFile(javaProjectPath + "/" + type);
 		}
 	}
 }

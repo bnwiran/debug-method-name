@@ -27,7 +27,7 @@ public class DataReader {
 	public List<Integer> readLabels(String testingLabelFile, List<MethodInfo> renamedOldMethodInfo, List<MethodInfo> renamedNewMethodInfo) throws IOException {
 		List<Integer> labels = new ArrayList<>();
 		
-		String content = FileHelper.readFile(testingLabelFile);
+		String content = FileHelper.readFile(new File(testingLabelFile));
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		int index = -1;
@@ -197,7 +197,7 @@ public class DataReader {
 	
 	private List<String> readInfo(String fileName) throws IOException {
 		List<String> infoList = new ArrayList<>();
-		String content = FileHelper.readFile(fileName);
+		String content = FileHelper.readFile(new File(fileName));
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		while ((line = reader.readLine()) != null) {

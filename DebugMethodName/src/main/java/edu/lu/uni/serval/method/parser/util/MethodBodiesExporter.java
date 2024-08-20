@@ -1,6 +1,7 @@
 package edu.lu.uni.serval.method.parser.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -94,7 +95,7 @@ public class MethodBodiesExporter {
 
 	private List<Integer> readIndexes(String fileName) {
 		List<Integer> indexes = new ArrayList<>();
-		String content = FileHelper.readFile(fileName);
+		String content = FileHelper.readFile(new File(fileName));
 		try {
 			BufferedReader reader = new BufferedReader(new StringReader(content));
 			String line = null;

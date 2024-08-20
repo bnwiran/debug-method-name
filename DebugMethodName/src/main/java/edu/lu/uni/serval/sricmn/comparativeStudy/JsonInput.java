@@ -44,15 +44,15 @@ public class JsonInput {
 
 	@SuppressWarnings("unused")
 	private void mergerData(String path, int a, String fileName) {
-		String fileContent = FileHelper.readFile(path + "trainingData_0.json");
+		String fileContent = FileHelper.readFile(new File(path + "trainingData_0.json"));
 		FileHelper.outputToFile(fileName, fileContent.substring(0, fileContent.lastIndexOf("]")) + ",", false);
 		
 		for (int i = 1; i < a; i ++) {
-			fileContent = FileHelper.readFile(path + "trainingData_" + i + ".json");
+			fileContent = FileHelper.readFile(new File(path + "trainingData_" + i + ".json"));
 			FileHelper.outputToFile(fileName, fileContent.substring(1, fileContent.lastIndexOf("]")) + ",", true);
 		}
 		
-		fileContent = FileHelper.readFile(path + "trainingData_" + a + ".json");
+		fileContent = FileHelper.readFile(new File(path + "trainingData_" + a + ".json"));
 		FileHelper.outputToFile(fileName, fileContent.substring(1), true);
 	}
 

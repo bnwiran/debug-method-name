@@ -3,6 +3,7 @@ package edu.lu.uni.serval.dlMethods;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,6 @@ public class DataPreparer {
 
 			/**
 			 * Prepare data:
-			 * 
 			 * Figure out the common first tokens of all method names. Select the methods of
 			 * which method names start with these common first tokens.
 			 */
@@ -48,10 +48,10 @@ public class DataPreparer {
 
 	public static List<String> readProjects() {
 		List<String> projects = new ArrayList<>();
-		String content = FileHelper.readFile(Configuration.JAVA_REPO_NAMES_FILE);
+		String content = FileHelper.readFile(Path.of(Configuration.JAVA_REPO_NAMES_FILE).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		try {
-			String line = null;
+			String line;
 			while ((line = reader.readLine()) != null) {
 				projects.add(line);
 			}

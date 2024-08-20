@@ -1,6 +1,7 @@
 package edu.lu.uni.serval.sricmn.comparativeStudy;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class EvaluateJson {
 		int top5FirstToken_ = 0;
 		int top15FirstToken_ = 0;
 //		validate,paths[get,path,create,client,zk,set,is,string,for,add,write,if,paths,exists,get_path]
-		String content = FileHelper.readFile(intputFile);
+		String content = FileHelper.readFile(new File(intputFile));
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		int listIndex = -1;
@@ -113,7 +114,7 @@ public class EvaluateJson {
 	@SuppressWarnings("unused")
 	private static List<Integer> readLabels(String fileName) throws IOException {
 		List<Integer> labels = new ArrayList<>();
-		String content = FileHelper.readFile(fileName);
+		String content = FileHelper.readFile(new File(fileName));
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		while ((line = reader.readLine()) != null) {
@@ -124,7 +125,7 @@ public class EvaluateJson {
 	}
 
 	private static void readNames(List<String> oldNames, List<String> newNames, String fileName) throws IOException {
-		String content = FileHelper.readFile(fileName);
+		String content = FileHelper.readFile(new File(fileName));
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		while ((line = reader.readLine()) != null) {

@@ -1,14 +1,12 @@
 package edu.lu.uni.serval.dlMethods;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
-import java.nio.file.Path;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import edu.lu.uni.Configuration;
-import edu.lu.uni.serval.utils.FileHelper;
 
 /**
  * Prepare data for deep learning of methods.
@@ -20,18 +18,13 @@ public class DataPreparer {
 	private static final int MIN_SIZE = 0; // The minimum size of vectors.
 
 	public static void main(String[] args) throws IOException {
-		List<String> projects = readProjects();
+		List<String> projects = readList(args[0]);
 		for (String project : projects) {
 			String inputPath = Configuration.TOKENIZED_METHODS_PATH + project + "/";
 			String renamedMethodsPath = Configuration.RENAMED_METHODS_PATH + project + "/ActualRenamed/";
 			String outputPath1 = Configuration.SELECTED_DATA_PATH + project + "/";
 			String outputPath2 = Configuration.SELECTED_RENAMED_DATA_PATH + project + "/";
 
-			/**
-			 * Prepare data:
-			 * Figure out the common first tokens of all method names. Select the methods of
-			 * which method names start with these common first tokens.
-			 */
 			DataInitializer dataInit = new DataInitializer();
 			dataInit.QUANTITY = QUANTITY;
 			dataInit.MIN_SIZE = MIN_SIZE;
@@ -39,35 +32,20 @@ public class DataPreparer {
 			dataInit.outputPath1 = outputPath1;
 			dataInit.outputPath2 = outputPath2;
 			dataInit.renamedMethodsPath = renamedMethodsPath;
-			dataInit.initializeData();
+			dataInit.initializeData(projects);
 			dataInit.selectMethod();
 		}
 		
-		DataMerger.merge();
+		DataMerger.merge(projects);
 	}
 
-	public static List<String> readProjects() {
-		List<String> projects = new ArrayList<>();
-		String content = FileHelper.readFile(Path.of(Configuration.JAVA_REPO_NAMES_FILE).toFile());
-		BufferedReader reader = new BufferedReader(new StringReader(content));
-		try {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				projects.add(line);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (reader != null) {
-					reader.close();
-					reader = null;
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return projects;
+	private static List<String> readList(String reposFileName) throws IOException {
+		return Files.readAllLines(Paths.get(reposFileName)).stream()
+				.map(line -> line.split("/"))
+				.map(line -> {
+					int index = line[line.length - 1].indexOf(".git");
+					return line[line.length - 1].substring(0, index);
+				}).collect(Collectors.toList());
 	}
 
 }

@@ -18,9 +18,7 @@ public class EmbedCodeTokens {
 		String outputPath = Configuration.DL_INPUT_DATA_PATH;
 		FileHelper.deleteFile(outputPath);
 		
-		TokensEmbedder embedder = new TokensEmbedder();
-		embedder.inputPath = inputPath;
-		embedder.outputPath = outputPath;
+		TokensEmbedder embedder = new TokensEmbedder(inputPath, outputPath);
 		embedder.mergeData(false);
 		embedder.embedTokens();
 		embedder.vectorizedData(true);

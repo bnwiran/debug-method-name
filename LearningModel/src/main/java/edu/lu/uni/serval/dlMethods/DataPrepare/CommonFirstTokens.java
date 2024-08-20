@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ public class CommonFirstTokens {
 	 */
 	public void readTokens() throws IOException {
 		String parsedMethodNamesFile = inputPath + "ParsedMethodNames.txt";
-		String content = FileHelper.readFile(Path.of(parsedMethodNamesFile).toFile());
+		String content = FileHelper.readFile(Paths.get(parsedMethodNamesFile).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		StringBuilder builder = new StringBuilder();

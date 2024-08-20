@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -21,21 +22,25 @@ import edu.lu.uni.serval.utils.FileHelper;
  *
  */
 public class TokensEmbedder {
-	public String inputPath;
-	public String outputPath;
-	
+	private final String inputPath;
+	private final String outputPath;
+
+	public TokensEmbedder(String inputPath, String outputPath) {
+		this.inputPath = inputPath;
+		this.outputPath = outputPath;
+	}
 	/**
 	 * Merge training data and testing data.
 	 */
 	public void mergeData(boolean mergeData) {
-		String methodTokens = inputPath + "SelectedData/SelectedMethodTokens.txt";
-		String embeddingInputData = inputPath + "embedding/inputData.txt";
+		Path methodTokens = Paths.get(inputPath, "SelectedData", "SelectedMethodTokens.txt");
+		Path embeddingInputData = Paths.get(inputPath, "embedding", "inputData.txt");
 		
 		// merge source code tokens of fixed violations.
-		FileHelper.outputToFile(embeddingInputData, FileHelper.readFile(Path.of(methodTokens).toFile()), false);
+		FileHelper.outputToFile(embeddingInputData, FileHelper.readFile(methodTokens), false);
 		if (mergeData) {
-			String renamedTokens = inputPath + "RenamedMethods/MethodTokens.txt";
-			FileHelper.outputToFile(embeddingInputData, FileHelper.readFile(Path.of(renamedTokens).toFile()), true);
+			Path renamedTokens = Paths.get(inputPath, "RenamedMethods", "MethodTokens.txt");
+			FileHelper.outputToFile(embeddingInputData, FileHelper.readFile(renamedTokens), true);
 		}
 	}
 	
@@ -43,17 +48,16 @@ public class TokensEmbedder {
 	 * Embed tokens with Word2Vec.
 	 */
 	public void embedTokens() {
-		String embeddingInputData = inputPath + "embedding/inputData.txt";
-		String embeddedTokensFile = inputPath + "embedding/embeddedTokens.txt";
+		Path embeddingInputData = Paths.get(inputPath, "embedding", "inputData.txt");
+		Path embeddedTokensFile = Paths.get(inputPath, "embedding", "embeddedTokens.txt");
 		Word2VecEncoder encoder = new Word2VecEncoder();
 		int windowSize = 4;
 		encoder.setWindowSize(windowSize);
 		try {
-			File inputFile = new File(embeddingInputData);
 			int minWordFrequency = 1;
 			int layerSize = 300;
 			
-			encoder.embedTokens(inputFile, minWordFrequency, layerSize, embeddedTokensFile);
+			encoder.embedTokens(embeddingInputData, minWordFrequency, layerSize, embeddedTokensFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -138,7 +142,6 @@ public class TokensEmbedder {
 			StringBuilder vectorizedTokenVector = vecBody.numericVector;
 			int length = vectorizedTokenVector.toString().trim().split(",").length;
 			if (length != vectorSize) {
-				System.err.println(length);
 				vectorSize = length;
 			}
 			builder.append(vectorizedTokenVector).append("\n");

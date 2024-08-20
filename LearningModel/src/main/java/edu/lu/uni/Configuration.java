@@ -1,7 +1,7 @@
 package edu.lu.uni;
 
 public class Configuration {
-	public static final String ROOT_PATH = "../Data/Output/";
+	public static final String ROOT_PATH = "Data/Output/";
 
 	public static final String TOKENIZED_METHODS_PATH = ROOT_PATH + "tokenization/";
 	public static final String RENAMED_METHODS_PATH = ROOT_PATH + "RenamedMethods/";

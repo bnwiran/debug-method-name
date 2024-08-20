@@ -52,7 +52,7 @@ public class MethodBodyCodeLearner {
 	
 	private static Logger log = LoggerFactory.getLogger(CNNFeatureExtractor.class);
 
-	public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		int nEpochs = 1;//Integer.valueOf(args[0]);//1, 10, 20
 		String rootPath = Configuration.DL_DATA_PATH;
 		String inputPath = Configuration.DL_INPUT_DATA_PATH;
@@ -172,7 +172,7 @@ public class MethodBodyCodeLearner {
 			this.modelFile = modelFile;
 		}
 
-		public void extracteFeaturesWithCNN() throws FileNotFoundException, IOException, InterruptedException {
+		public void extracteFeaturesWithCNN() throws IOException, InterruptedException {
 	        log.info("Load data....");
 	        RecordReader trainingDataReader = new CSVRecordReader();
 	        trainingDataReader.initialize(new FileSplit(inputFile));

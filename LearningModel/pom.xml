@@ -8,8 +8,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- <nd4j.backend>nd4j-cuda-8.0-platform</<nd4j.backend> --> <!-- GPU version -->
-		<dl4j.version>1.0.0-M2.1</dl4j.version>
-		<nd4j.version>1.0.0-M2.1</nd4j.version>
+		<dl4j.version>0.8.0</dl4j.version>
+		<nd4j.version>0.8.0</nd4j.version>
 	</properties>
 
 	<dependencies>
@@ -34,15 +34,27 @@
 		</dependency>
 		
 		<!-- deep learning for java -->
+<!--		<dependency>-->
+<!--		    <groupId>org.deeplearning4j</groupId>-->
+<!--		    <artifactId>deeplearning4j-ui</artifactId>-->
+<!--	        <version>${dl4j.version}</version>-->
+<!--	    </dependency>-->
+
 		<dependency>
-		    <groupId>org.deeplearning4j</groupId>
-		    <artifactId>deeplearning4j-ui</artifactId>
-	        <version>${dl4j.version}</version>
-	    </dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.20</version>
+			<scope>provided</scope>
+		</dependency>
     
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-core</artifactId>
+			<version>${dl4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.deeplearning4j</groupId>
+			<artifactId>deeplearning4j-ui_2.11</artifactId>
 			<version>${dl4j.version}</version>
 		</dependency>
 		<dependency>
@@ -88,8 +100,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.2</version>
 				<configuration>
-					<source>21</source>
-					<target>21</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 		</plugins>

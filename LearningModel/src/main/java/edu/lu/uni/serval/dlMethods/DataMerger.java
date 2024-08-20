@@ -3,6 +3,7 @@ package edu.lu.uni.serval.dlMethods;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -14,8 +15,7 @@ public class DataMerger {
 	/**
 	 * Merge data.
 	 */
-	public static void merge() {
-		List<String> projects = DataPreparer.readProjects();
+	public static void merge(List<String> projects) {
 		String methodTokensPath = Configuration.SELECTED_DATA_PATH + "SelectedMethodTokens.txt";
 		String methodInfoPath = Configuration.SELECTED_DATA_PATH  + "SelectedMethodInfo.txt";
 		String renamedMethodTokensPath = Configuration.SELECTED_RENAMED_DATA_PATH + "MethodTokens.txt";
@@ -43,11 +43,11 @@ public class DataMerger {
 			 */
 			String dataPath1 = Configuration.SELECTED_DATA_PATH + project;
 			String dataPath2 = Configuration.SELECTED_RENAMED_DATA_PATH + project;
-			FileHelper.outputToFile(methodTokensPath, FileHelper.readFile(Path.of(dataPath1, "SelectedMethodTokens.txt").toFile()), true);
-			FileHelper.outputToFile(methodInfoPath, FileHelper.readFile(Path.of(dataPath1,"SelectedMethodInfo.txt").toFile()), true);
-			FileHelper.outputToFile(renamedMethodTokensPath, FileHelper.readFile(Path.of(dataPath2,"MethodTokens.txt").toFile()), true);
-			FileHelper.outputToFile(renamedMethodInfoPath, FileHelper.readFile(Path.of(dataPath2, "MethodInfo.txt").toFile()), true);
-			FileHelper.outputToFile(renamedMethodNamesPath, FileHelper.readFile(Path.of(dataPath2, "ParsedMethodNames.txt").toFile()), true);
+			FileHelper.outputToFile(methodTokensPath, FileHelper.readFile(Paths.get(dataPath1, "SelectedMethodTokens.txt").toFile()), true);
+			FileHelper.outputToFile(methodInfoPath, FileHelper.readFile(Paths.get(dataPath1,"SelectedMethodInfo.txt").toFile()), true);
+			FileHelper.outputToFile(renamedMethodTokensPath, FileHelper.readFile(Paths.get(dataPath2,"MethodTokens.txt").toFile()), true);
+			FileHelper.outputToFile(renamedMethodInfoPath, FileHelper.readFile(Paths.get(dataPath2, "MethodInfo.txt").toFile()), true);
+			FileHelper.outputToFile(renamedMethodNamesPath, FileHelper.readFile(Paths.get(dataPath2, "ParsedMethodNames.txt").toFile()), true);
 		}
 		
 		File[] files = new File(Configuration.SELECTED_DATA_PATH + "TrainingData/").listFiles();

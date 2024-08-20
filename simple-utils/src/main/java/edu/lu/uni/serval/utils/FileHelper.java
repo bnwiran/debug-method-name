@@ -41,8 +41,8 @@ public class FileHelper {
     }
   }
 
-  public static void deleteFile(String dir) {
-    File directory = new File(dir);
+  public static void deleteFile(String file) {
+    File directory = new File(file);
 
     if (directory.exists()) {
       try (Stream<Path> pathStream = Files.walk(directory.toPath())) {
@@ -92,6 +92,21 @@ public class FileHelper {
   /**
    * Read the content of a file.
    *
+   * @param path
+   * @return String, the content of a file.
+   */
+  public static String readFile(Path path) {
+    try {
+      return Files.readString(path);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return "";
+  }
+
+  /**
+   * Read the content of a file.
+   *
    * @param file
    * @return String, the content of a file.
    */
@@ -117,6 +132,10 @@ public class FileHelper {
 
   public static void outputToFile(Path path, StringBuilder data, boolean append) {
     outputToFile(path.toFile(), data.toString(), append);
+  }
+
+  public static void outputToFile(Path path, String data, boolean append) {
+    outputToFile(path.toFile(), data, append);
   }
 
   public static void outputToFile(String fileName, String data, boolean append) {
@@ -147,8 +166,12 @@ public class FileHelper {
   }
 
   public static void makeDirectory(String fileName) {
-    deleteFile(fileName);
-    File file = new File(fileName).getParentFile();
+    makeDirectory(Path.of(fileName));
+  }
+
+  public static void makeDirectory(Path path) {
+    deleteFile(path);
+    File file = path.toFile().getParentFile();
     if (!file.exists()) {
       file.mkdirs();
     }

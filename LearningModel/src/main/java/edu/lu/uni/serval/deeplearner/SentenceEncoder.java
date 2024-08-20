@@ -2,6 +2,7 @@ package edu.lu.uni.serval.deeplearner;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
 
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.paragraphvectors.ParagraphVectors;
@@ -16,12 +17,10 @@ import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import edu.lu.uni.serval.utils.FileHelper;
 
 public class SentenceEncoder {
-	
-	public ParagraphVectors vec;
 
 	@SuppressWarnings("deprecation")
-	public void encodeSentences(File inputFile, int minWordFrequency, int layerSize, int windowSize, String outputFileName) throws FileNotFoundException {
-        SentenceIterator iter = new BasicLineIterator(inputFile);
+	public void encodeSentences(Path inputFile, int minWordFrequency, int layerSize, int windowSize, Path outputFileName) throws FileNotFoundException {
+        SentenceIterator sentenceIterator = new BasicLineIterator(inputFile.toFile());
         AbstractCache<VocabWord> cache = new AbstractCache<>();
 
         TokenizerFactory t = new DefaultTokenizerFactory();
@@ -30,7 +29,7 @@ public class SentenceEncoder {
         /*
              if you don't have LabelAwareIterator handy, you can use synchronized labels generator
               it will be used to label each document/sequence/line with it's own label.
-              But if you have LabelAwareIterator ready, you can can provide it, for your in-house labels
+              But if you have LabelAwareIterator ready, you can provide it, for your in-house labels
         */
         LabelsSource source = new LabelsSource("SEN_");
 
@@ -42,7 +41,7 @@ public class SentenceEncoder {
                 .learningRate(0.025)
                 .labelsSource(source)
                 .windowSize(windowSize)
-                .iterate(iter)
+                .iterate(sentenceIterator)
                 .trainWordVectors(false)
                 .vocabCache(cache)
                 .tokenizerFactory(t)
@@ -50,12 +49,11 @@ public class SentenceEncoder {
                 .build();
 
         vec.fit();
-        this.vec = vec;
 
         FileHelper.makeDirectory(outputFileName);
-        String modelName = outputFileName.substring(0, outputFileName.lastIndexOf(".")) + ".zip";
-        WordVectorSerializer.writeWord2VecModel(vec, new File(modelName)); // output model to a file
-        WordVectorSerializer.writeWordVectors(vec, outputFileName);
+        String modelName = outputFileName.toString().substring(0, outputFileName.toString().lastIndexOf(".")) + ".zip";
+        WordVectorSerializer.writeWord2VecModel(vec, new File(modelName));
+        WordVectorSerializer.writeWordVectors(vec, outputFileName.toString());
 	}
 
 }

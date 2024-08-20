@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -89,7 +90,7 @@ public class RenamedMethodSelector {
 	
 	public List<Integer> readSizes(String sizesFile) throws IOException {
 		List<Integer> sizesList = new ArrayList<>();
-		String sizesContent = FileHelper.readFile(Path.of(sizesFile).toFile());
+		String sizesContent = FileHelper.readFile(Paths.get(sizesFile).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(sizesContent));
 		String line = null;
 		while ((line = reader.readLine()) != null) {
@@ -102,7 +103,7 @@ public class RenamedMethodSelector {
 
 	private List<String> readFirstTokens(String parsedMethodNamesFile, List<String> parsedMethodNames) throws IOException {
 		List<String> firstTokens = new ArrayList<>();
-		String content = FileHelper.readFile(Path.of(parsedMethodNamesFile).toFile());
+		String content = FileHelper.readFile(Paths.get(parsedMethodNamesFile).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line = null;
 		while ((line = reader.readLine()) != null) {

@@ -100,10 +100,10 @@ public class MethodNameFeatureLearner {
 			SIZE ++;
 		}
 
-		FileHelper.outputToFile(outputFile, builder, false);
-		FileHelper.outputToFile(outputLabelFile, labelBuilder, false);
-		FileHelper.outputToFile(outputFile + ".bak", builder2, false);
-		FileHelper.outputToFile(outputLabelFile + ".bak", labelBuilder2, false);
+		FileHelper.outputToFile(outputFile, builder.toString(), false);
+		FileHelper.outputToFile(outputLabelFile, labelBuilder.toString(), false);
+		FileHelper.outputToFile(Paths.get(outputFile + ".bak"), builder2.toString(), false);
+		FileHelper.outputToFile(Paths.get(outputLabelFile + ".bak"), labelBuilder2.toString(), false);
 	}
 
 	private List<String> readFile(Path methodNameTokensFile) throws IOException {
@@ -139,16 +139,16 @@ public class MethodNameFeatureLearner {
 		scanner.close();
 		fis.close();
 		
-		FileHelper.outputToFile(featureLearningData1, builder, false);
-		FileHelper.outputToFile(featureLearningData1 + ".bak", builder, false);
+		FileHelper.outputToFile(featureLearningData1, builder.toString(), false);
+		FileHelper.outputToFile(Paths.get(featureLearningData1 + ".bak"), builder.toString(), false);
 		String content = FileHelper.readFile(testingMethodNamesFile.toFile());
 		String contentBak = FileHelper.readFile(Paths.get(testingMethodNamesFile + ".bak").toFile());
 		FileHelper.outputToFile(featureLearningData1, content, true);
-		FileHelper.outputToFile(featureLearningData1 + ".bak", contentBak, true);
+		FileHelper.outputToFile(Paths.get(featureLearningData1 + ".bak"), contentBak, true);
 		
 		if (featureLearningData2 != null) {
-			FileHelper.outputToFile(featureLearningData2, returnTypeBuilder, false);
-			FileHelper.outputToFile(featureLearningData2 + ".bak", returnTypeBuilder, false);
+			FileHelper.outputToFile(featureLearningData2, returnTypeBuilder.toString(), false);
+			FileHelper.outputToFile(Paths.get(featureLearningData2 + ".bak"), returnTypeBuilder.toString(), false);
 		}
 		returnTypeBuilder.setLength(0);
 		StringBuilder returnTypeBuilderBak = new StringBuilder();
@@ -169,8 +169,8 @@ public class MethodNameFeatureLearner {
 		reader.close();
 		
 		if (featureLearningData2 != null) {
-			FileHelper.outputToFile(featureLearningData2, returnTypeBuilder, true);
-			FileHelper.outputToFile(featureLearningData2 + ".bak", returnTypeBuilderBak, true);
+			FileHelper.outputToFile(featureLearningData2, returnTypeBuilder.toString(), true);
+			FileHelper.outputToFile(Paths.get(featureLearningData2 + ".bak"), returnTypeBuilderBak.toString(), true);
 		}
 	}
 

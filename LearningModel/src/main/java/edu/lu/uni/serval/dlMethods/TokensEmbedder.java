@@ -32,16 +32,11 @@ public class TokensEmbedder {
 	/**
 	 * Merge training data and testing data.
 	 */
-	public void mergeData(boolean mergeData) {
+	public void mergeData() {
 		Path methodTokens = Paths.get(inputPath, "SelectedData", "SelectedMethodTokens.txt");
 		Path embeddingInputData = Paths.get(inputPath, "embedding", "inputData.txt");
-		
-		// merge source code tokens of fixed violations.
+
 		FileHelper.outputToFile(embeddingInputData, FileHelper.readFile(methodTokens), false);
-		if (mergeData) {
-			Path renamedTokens = Paths.get(inputPath, "RenamedMethods", "MethodTokens.txt");
-			FileHelper.outputToFile(embeddingInputData, FileHelper.readFile(renamedTokens), true);
-		}
 	}
 	
 	/**
@@ -51,8 +46,8 @@ public class TokensEmbedder {
 		Path embeddingInputData = Paths.get(inputPath, "embedding", "inputData.txt");
 		Path embeddedTokensFile = Paths.get(inputPath, "embedding", "embeddedTokens.txt");
 		Word2VecEncoder encoder = new Word2VecEncoder();
-		int windowSize = 4;
-		encoder.setWindowSize(windowSize);
+
+		encoder.setWindowSize(4);
 		try {
 			int minWordFrequency = 1;
 			int layerSize = 300;
@@ -64,7 +59,7 @@ public class TokensEmbedder {
 	}
 	
 	public void vectorizedData(boolean benchMark) throws IOException {
-		String embeddedTokensFile = inputPath + "embedding/embeddedTokens.txt";
+		Path embeddedTokensFile = Paths.get(inputPath, "embedding", "embeddedTokens.txt");
 		Map<String, String> embeddedTokens = readEmbeddedTokens(embeddedTokensFile);
 		StringBuilder zeroVector = new StringBuilder();
 		int size = Configuration.SIZE_OF_EMBEDDED_VECTOR - 1;
@@ -74,7 +69,7 @@ public class TokensEmbedder {
 		zeroVector.append("0");
 		
 		if (benchMark) {
-			File[] files = new File(inputPath + "SelectedData/TrainingData/").listFiles();
+			File[] files = Paths.get(inputPath, "SelectedData", "TrainingData").toFile().listFiles();
 			int maxSize = 0;
 			File trainingDataFile = null;
 			for (File file : files) {
@@ -86,10 +81,10 @@ public class TokensEmbedder {
 			}
 			vectorizeTokenVector(trainingDataFile, embeddedTokens, maxSize, zeroVector, outputPath + "TrainingData_");
 			
-			File renamedMethodsFile = new File(inputPath + "RenamedMethods/MethodTokens.txt");
+			File renamedMethodsFile = Paths.get(inputPath, "RenamedMethods", "MethodTokens.txt").toFile();
 			vectorizeTokenVector(renamedMethodsFile, embeddedTokens, maxSize, zeroVector, outputPath + "RenamedData_");
 		} else {
-			File[] files = new File(inputPath + "TrainingData/").listFiles();
+			File[] files = Paths.get(inputPath, "TrainingData").toFile().listFiles();
 			File trainingDataFile = null;
 			int maxSize = 0;
 			for (File file : files) {
@@ -101,16 +96,16 @@ public class TokensEmbedder {
 			}
 			vectorizeTokenVector(trainingDataFile, embeddedTokens, maxSize, zeroVector, outputPath + "TrainingData_");
 			
-			File testingDataFile = new File(inputPath + "TestingData/" + trainingDataFile.getName());
+			File testingDataFile = Paths.get(inputPath, "TestingData", trainingDataFile.getName()).toFile();
 			vectorizeTokenVector(testingDataFile, embeddedTokens, maxSize, zeroVector, outputPath + "TestingData_");
 		}
 	}
 
-	public Map<String, String> readEmbeddedTokens(String embeddedTokensFile) throws IOException {
+	public Map<String, String> readEmbeddedTokens(Path embeddedTokensFile) throws IOException {
 		Map<String, String> embeddedTokens = new HashMap<>();
-		File file = new File(embeddedTokensFile);
-		FileInputStream fis = null;
-		Scanner scanner = null;
+		File file = embeddedTokensFile.toFile();
+		FileInputStream fis;
+		Scanner scanner;
 		fis = new FileInputStream(file);
 		scanner = new Scanner(fis);
 		while (scanner.hasNextLine()) {
@@ -127,7 +122,7 @@ public class TokensEmbedder {
 	}
 
 	public void vectorizeTokenVector(File tokenVectorsFile, Map<String, String> embeddedTokens, int maxSize, StringBuilder zeroVector, String outputFileName) throws IOException {
-		outputFileName += tokenVectorsFile.getName().replace(".txt", ".csv");
+		Path csvOutputPath = Paths.get(outputFileName + tokenVectorsFile.getName().replace(".txt", ".csv"));
 		
 		FileInputStream fis = new FileInputStream(tokenVectorsFile);
 		Scanner scanner = new Scanner(fis);
@@ -147,14 +142,14 @@ public class TokensEmbedder {
 			builder.append(vectorizedTokenVector).append("\n");
 			counter ++;
 			if (counter % 500 == 0) {
-				FileHelper.outputToFile(outputFileName, builder, true);
+				FileHelper.outputToFile(csvOutputPath, builder.toString(), true);
 				builder.setLength(0);
 			}
 		}
 		scanner.close();
 		fis.close();
 		
-		FileHelper.outputToFile(outputFileName, builder, true);
+		FileHelper.outputToFile(csvOutputPath, builder.toString(), true);
 		builder.setLength(0);
 	}
 	
@@ -164,8 +159,8 @@ public class TokensEmbedder {
 	 * @author kui.liu
 	 *
 	 */
-	public class SingleVectorizer {
-		public StringBuilder numericVector = new StringBuilder();
+	public static class SingleVectorizer {
+		private StringBuilder numericVector = new StringBuilder();
 		
 		/**
 		 * Append symbol "," in each iteration.
@@ -177,7 +172,7 @@ public class TokensEmbedder {
 		 */
 		public void vectorize(List<String> tokenVector, Map<String, String> embeddedTokens, int maxSize, StringBuilder zeroVector) {
 			int i = 0;
-			for (int size = tokenVector.size(); i < size; i ++) {
+			for (; i < tokenVector.size(); i ++) {
 				String numericVectorOfSingleToken = embeddedTokens.get(tokenVector.get(i));
 				if (numericVectorOfSingleToken == null) {
 					numericVectorOfSingleToken = zeroVector.toString();

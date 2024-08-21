@@ -1,5 +1,12 @@
 package edu.lu.uni.serval.dlMethods;
 
+import edu.lu.uni.Configuration;
+import edu.lu.uni.serval.dlMethods.DataPrepare.CommonFirstTokens;
+import edu.lu.uni.serval.dlMethods.DataPrepare.RenamedMethodSelector;
+import edu.lu.uni.serval.utils.Distribution;
+import edu.lu.uni.serval.utils.Distribution.MaxSizeType;
+import edu.lu.uni.serval.utils.FileHelper;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,13 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
-
-import edu.lu.uni.Configuration;
-import edu.lu.uni.serval.dlMethods.DataPrepare.CommonFirstTokens;
-import edu.lu.uni.serval.dlMethods.DataPrepare.RenamedMethodSelector;
-import edu.lu.uni.serval.utils.Distribution;
-import edu.lu.uni.serval.utils.Distribution.MaxSizeType;
-import edu.lu.uni.serval.utils.FileHelper;
 
 /**
  * Figure out the common first tokens of all method names.
@@ -83,7 +83,7 @@ public class DataInitializer {
     this.commonFirstTokens = cft.commonFirstTokens;
 
 
-    File sizesFile = new File(Configuration.TOKENIZED_METHODS_PATH + "sizes.csv");
+    File sizesFile = Paths.get(Configuration.TOKENIZED_METHODS_PATH, "sizes.csv").toFile();
     if (!sizesFile.exists()) {
       // Merge sizes files.
       for (String project : projects) {
@@ -91,7 +91,7 @@ public class DataInitializer {
         if (!new File(sizeFile).exists()) {
             continue;
         }
-        FileHelper.outputToFile(sizesFile, FileHelper.readFile(Paths.get(sizeFile).toFile()), true);
+        FileHelper.outputToFile(sizesFile.toPath(), FileHelper.readFile(Paths.get(sizeFile).toFile()), true);
       }
     }
 
@@ -188,9 +188,9 @@ public class DataInitializer {
         counter++;
 
         if (counter % 10000 == 0) {
-          FileHelper.outputToFile(outputPath1 + "SelectedMethodTokens.txt", tokensBuilder, true);
+          FileHelper.outputToFile(Paths.get(outputPath1, "SelectedMethodTokens.txt"), tokensBuilder.toString(), true);
           tokensBuilder.setLength(0);
-          FileHelper.outputToFile(outputPath1 + "SelectedMethodInfo.txt", methodInfoBuilder, true);
+          FileHelper.outputToFile(Paths.get(outputPath1, "SelectedMethodInfo.txt"), methodInfoBuilder.toString(), true);
           methodInfoBuilder.setLength(0);
         }
       }
@@ -199,18 +199,21 @@ public class DataInitializer {
     scanner.close();
     fis.close();
 
-    FileHelper.outputToFile(outputPath1 + "SelectedSizes.csv", sizesBuilder, false);
-    FileHelper.outputToFile(outputPath1 + "SelectedMethodTokens.txt", tokensBuilder, true);
+    FileHelper.outputToFile(Paths.get(outputPath1, "SelectedSizes.csv"), sizesBuilder.toString(), false);
+    FileHelper.outputToFile(Paths.get(outputPath1, "SelectedMethodTokens.txt"), tokensBuilder.toString(), true);
     tokensBuilder.setLength(0);
-    FileHelper.outputToFile(outputPath1 + "SelectedMethodInfo.txt", methodInfoBuilder, true);
+    FileHelper.outputToFile(Paths.get(outputPath1, "SelectedMethodInfo.txt"), methodInfoBuilder.toString(), true);
     methodInfoBuilder.setLength(0);
 
-    File tokensFile_ = new File(Configuration.SELECTED_DATA_PATH + "TrainingData/Tokens_MaxSize=" + this.maxSize + ".txt");
-    if (!tokensFile_.exists()) FileHelper.outputToFile(tokensFile_, "", false);
+    File tokensFile_ = Paths.get(Configuration.SELECTED_DATA_PATH, "TrainingData", "Tokens_MaxSize=" + this.maxSize + ".txt").toFile();
+    if (!tokensFile_.exists()) {
+      FileHelper.outputToFile(tokensFile_.toPath(), "", false);
+    }
 
-    FileHelper.outputToFile(outputPath2 + "MethodTokens.txt", tokensBuilderOfSelectedRenamedMethods, false);
-    FileHelper.outputToFile(outputPath2 + "MethodInfo.txt", methodInfoBuilderOfSelectedRenamedMethods, false);
-    FileHelper.outputToFile(outputPath2 + "ParsedMethodNames.txt", selectedParseRenamedMethodNames, false);
+    FileHelper.outputToFile(Paths.get(outputPath2, "MethodTokens.txt"), tokensBuilderOfSelectedRenamedMethods.toString(), false);
+    FileHelper.outputToFile(Paths.get(outputPath2, "MethodInfo.txt"), methodInfoBuilderOfSelectedRenamedMethods.toString(), false);
+    FileHelper.outputToFile(Paths.get(outputPath2, "ParsedMethodNames.txt"), selectedParseRenamedMethodNames.toString(), false);
+
     System.out.println("Number of further selected renamed methods:" + furtherSelecteRenamedMethodIndexes.size());
     System.out.println("Number of selected training methods:" + this.selectedMethodInfoOfAllMethods.size());
     System.out.println("Renamed methods: " + a);
@@ -220,8 +223,8 @@ public class DataInitializer {
   }
 
   private void exportMethodBodies() throws IOException {
-    String selectedMethodsPath = outputPath1 + "method_bodies.txt";
-    new File(selectedMethodsPath).delete();
+    Path selectedMethodsPath = Paths.get(outputPath1, "method_bodies.txt");
+    selectedMethodsPath.toFile().delete();
 
     String methodBodyFile = inputPath + "method_bodies.txt";
     FileInputStream fis = new FileInputStream(methodBodyFile);
@@ -238,7 +241,7 @@ public class DataInitializer {
           if (this.selectMethodIndexes.contains(index)) {
             selectedMethods.append(singleMethod.toString().replace("@Override", "")).append("\n");
             if (counter % 2000 == 0) {
-              FileHelper.outputToFile(selectedMethodsPath, selectedMethods, true);
+              FileHelper.outputToFile(selectedMethodsPath, selectedMethods.toString(), true);
               selectedMethods.setLength(0);
             }
             counter++;
@@ -260,10 +263,8 @@ public class DataInitializer {
     scanner.close();
     fis.close();
 
-    FileHelper.outputToFile(selectedMethodsPath, selectedMethods, true);
+    FileHelper.outputToFile(selectedMethodsPath, selectedMethods.toString(), true);
     selectedMethods.setLength(0);
-
-    isMethodBody = false;
 
     // Export the method bodies of further selected renamed methods.
     String renamedMethodBodyFile = this.renamedMethodsPath + "/MethodBodies.txt";
@@ -298,7 +299,7 @@ public class DataInitializer {
       counter++;
       testMethods.append(singleMethod.toString().replace("@Override", "")).append("\n");
     }
-    FileHelper.outputToFile(outputPath2 + "method_bodies/TestingMethods.java", "public class TestingMethods {\n" + testMethods.toString() + "}", false);
+    FileHelper.outputToFile(Paths.get(outputPath2, "method_bodies", "TestingMethods.java"), "public class TestingMethods {\n" + testMethods + "}", false);
     System.out.println("Testing methods: " + counter);
   }
 

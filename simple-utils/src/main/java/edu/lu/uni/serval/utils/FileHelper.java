@@ -119,30 +119,8 @@ public class FileHelper {
     return "";
   }
 
-  /**
-   * Output output into a file.
-   *
-   * @param fileName, output file name.
-   * @param data,     output data.
-   * @param append,   the output data will be appended previous data in the file or not.
-   */
-  public static void outputToFile(String fileName, StringBuilder data, boolean append) {
-    outputToFile(fileName, data.toString(), append);
-  }
-
-  public static void outputToFile(Path path, StringBuilder data, boolean append) {
-    outputToFile(path.toFile(), data.toString(), append);
-  }
-
   public static void outputToFile(Path path, String data, boolean append) {
-    outputToFile(path.toFile(), data, append);
-  }
-
-  public static void outputToFile(String fileName, String data, boolean append) {
-    outputToFile(new File(fileName), data, append);
-  }
-
-  public static void outputToFile(File file, String data, boolean append) {
+    File file = path.toFile();
     file.getParentFile().mkdirs();
     try {
       if (append) {

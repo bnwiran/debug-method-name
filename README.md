@@ -33,7 +33,8 @@ How to run debug-method-name
   - `mvn dependency:copy-dependencies`
   - `mvn package`
   - `mv target/RenamedMethodsCollector-0.0.1-SNAPSHOT.jar target/dependency`
-  - `java -cp "target/dependency/*" -Xmx8g edu.lu.uni.serval.renamed.methods.Main`
+  - `cd ..`
+  - `java -cp "RenamedMethodsCollector/target/dependency/*" -Xmx8g edu.lu.uni.serval.renamed.methods.Main <repos_file_name>`
   
 5. Prepare data: Parse methods in Java projects.
    **Note that:** it will take **a long time and a big space** to prepare the data for this experiment, we recommend to use the data we already have to proceed the following steps.

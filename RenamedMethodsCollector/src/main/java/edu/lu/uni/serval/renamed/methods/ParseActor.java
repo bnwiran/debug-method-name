@@ -111,10 +111,10 @@ public class ParseActor extends UntypedActor {
 	}
 
 	private void mergeData() throws IOException {
-		String methodsFile = outputPath + "/RenamedMethods.txt";
+		Path methodsFile = Path.of(outputPath, "RenamedMethods.txt");
 		FileHelper.deleteFile(methodsFile);
 
-		String methodBodiesFile = outputPath + "/MethodBodies.txt";
+		Path methodBodiesFile = Path.of(outputPath + "MethodBodies.txt");
 		FileHelper.deleteFile(methodBodiesFile);
 
 		StringBuilder sizes = new StringBuilder();
@@ -141,7 +141,7 @@ public class ParseActor extends UntypedActor {
 					newMethodNames.append(elements[5]).append("\n");
 					counter ++;
 					if (counter % 2000 == 0) {
-						FileHelper.outputToFile(methodsFile, methods, true);
+						FileHelper.outputToFile(methodsFile, methods.toString(), true);
 						methods.setLength(0);
 					}
 				} else {
@@ -156,20 +156,20 @@ public class ParseActor extends UntypedActor {
 		}
 		
 		if (!methods.isEmpty()) {
-			FileHelper.outputToFile(methodsFile, methods, true);
+			FileHelper.outputToFile(methodsFile, methods.toString(), true);
 			methods.setLength(0);
 		}
 
-		String sizesFile = outputPath + "/Sizes.csv";
-		FileHelper.outputToFile(sizesFile, sizes, false);
+		Path sizesFile = Path.of(outputPath, "Sizes.csv");
+		FileHelper.outputToFile(sizesFile, sizes.toString(), false);
 		sizes.setLength(0);
 
-		String oldMethodNamesFile = outputPath + "/OldMethodNames.txt";
-		FileHelper.outputToFile(oldMethodNamesFile, oldMethodNames, false);
+		Path oldMethodNamesFile = Path.of(outputPath, "OldMethodNames.txt");
+		FileHelper.outputToFile(oldMethodNamesFile, oldMethodNames.toString(), false);
 		oldMethodNames.setLength(0);
 
-		String newMethodNamesFile = outputPath + "/NewMethodNames.txt";
-		FileHelper.outputToFile(newMethodNamesFile, newMethodNames, false);
+		Path newMethodNamesFile = Path.of(outputPath, "NewMethodNames.txt");
+		FileHelper.outputToFile(newMethodNamesFile, newMethodNames.toString(), false);
 		newMethodNames.setLength(0);
 
 		FileHelper.deleteFile(Path.of(outputPath, "RenamedMethods"));

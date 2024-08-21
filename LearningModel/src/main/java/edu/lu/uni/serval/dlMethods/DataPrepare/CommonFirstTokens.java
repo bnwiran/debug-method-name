@@ -1,18 +1,17 @@
 package edu.lu.uni.serval.dlMethods.DataPrepare;
 
+import edu.lu.uni.serval.utils.FileHelper;
+import edu.lu.uni.serval.utils.ReturnType;
+import edu.lu.uni.serval.utils.ReturnType.ReturnTypeClassification;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import edu.lu.uni.serval.utils.FileHelper;
-import edu.lu.uni.serval.utils.ReturnType;
-import edu.lu.uni.serval.utils.ReturnType.ReturnTypeClassification;
 
 public class CommonFirstTokens {
 	
@@ -43,7 +42,7 @@ public class CommonFirstTokens {
 		String parsedMethodNamesFile = inputPath + "ParsedMethodNames.txt";
 		String content = FileHelper.readFile(Paths.get(parsedMethodNamesFile).toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(content));
-		String line = null;
+		String line;
 		StringBuilder builder = new StringBuilder();
 		while ((line = reader.readLine()) != null) {
 			//hibernate-metamodelgen:org.hibernate.jpamodelgen.util:StringUtil:determineFullyQualifiedClassName:String+defaultPackage+String+name:String#determine:VB,Fully:NNP,Qualified:NNP,Class:NNP,Name:VB
@@ -87,7 +86,7 @@ public class CommonFirstTokens {
 		}
 		reader.close();
 		
-		FileHelper.outputToFile(this.outputPath + "ParsedMethodNames.txt", builder, false);
+		FileHelper.outputToFile(Paths.get(outputPath, "ParsedMethodNames.txt"), builder.toString(), false);
 		builder.setLength(0);
 	}
 
@@ -102,7 +101,7 @@ public class CommonFirstTokens {
 				this.commonFirstTokens.add(entry.getKey());
 			}
 		}
-		FileHelper.outputToFile(outputPath + "FirstTokens.csv", builder, false);
+		FileHelper.outputToFile(Paths.get(outputPath, "FirstTokens.csv"), builder.toString(), false);
 		builder.setLength(0);
 		
 		for (Map.Entry<String, Map<String, Integer>> entry : this.returnTypes.entrySet()) {
@@ -112,7 +111,7 @@ public class CommonFirstTokens {
 			for (Map.Entry<String, Integer> subEntry : firstTokens.entrySet()) {
 				builder.append(subEntry.getKey()).append(",").append(subEntry.getValue()).append("\n");
 			}
-			FileHelper.outputToFile(outputPath + "/ReturnTypes/" + returnType + ".csv", builder, false);
+			FileHelper.outputToFile(Paths.get(outputPath, "ReturnTypes", returnType + ".csv"), builder.toString(), false);
 			builder.setLength(0);
 		}
 	}

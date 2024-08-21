@@ -242,7 +242,7 @@ public class GitRepository {
 
           String diffEntryChangedDetails = getDiffEntryChangedDetails(commitDiffEntry);
           Path diffEntryFilePath = Path.of(this.difffEntriesPath.toString(), createFileName.replace(".java", ".txt"));
-          FileHelper.outputToFile(diffEntryFilePath.toString(), diffEntryChangedDetails, false);
+          FileHelper.outputToFile(diffEntryFilePath, diffEntryChangedDetails, false);
         }
       }
     }

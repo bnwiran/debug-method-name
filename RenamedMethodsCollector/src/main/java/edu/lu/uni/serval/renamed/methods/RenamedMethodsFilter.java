@@ -70,10 +70,10 @@ public class RenamedMethodsFilter {
         }
       }
     }
-    FileHelper.outputToFile(Path.of(dataPath, "Typo", "MethodNamePairs.txt"), typos, false);
-    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "MethodNamesInfo.txt"), renames, false);
-    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "ParsedOldNames.txt"), oldNames, false);
-    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "ParsedNewNames.txt"), newNames, false);
+    FileHelper.outputToFile(Path.of(dataPath, "Typo", "MethodNamePairs.txt"), typos.toString(), false);
+    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "MethodNamesInfo.txt"), renames.toString(), false);
+    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "ParsedOldNames.txt"), oldNames.toString(), false);
+    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "ParsedNewNames.txt"), newNames.toString(), false);
     return renameIndexes;
   }
 
@@ -98,8 +98,8 @@ public class RenamedMethodsFilter {
       }
     }
 
-    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "MethodTokens.txt"), methodsBuilder, false);
-    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "MethodTokensSizes.csv"), methodTokensBuilder, false);
+    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "MethodTokens.txt"), methodsBuilder.toString(), false);
+    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "MethodTokensSizes.csv"), methodTokensBuilder.toString(), false);
   }
 
   private static void writeTypoMethods(String dataPath, List<Integer> renameIndexes) throws IOException {
@@ -123,8 +123,8 @@ public class RenamedMethodsFilter {
       }
     }
 
-    FileHelper.outputToFile(Path.of(dataPath, "Typo", "MethodTokens.txt"), methodsBuilder, false);
-    FileHelper.outputToFile(Path.of(dataPath, "Typo", "MethodTokensSizes.csv"), methodTokensBuilder, false);
+    FileHelper.outputToFile(Path.of(dataPath, "Typo", "MethodTokens.txt"), methodsBuilder.toString(), false);
+    FileHelper.outputToFile(Path.of(dataPath, "Typo", "MethodTokensSizes.csv"), methodTokensBuilder.toString(), false);
   }
 
   private static void writeMethodBodies(String dataPath, List<Integer> renameIndexes) throws IOException {
@@ -158,7 +158,7 @@ public class RenamedMethodsFilter {
       singleMethod.setLength(0);
     }
 
-    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "MethodBodies.txt"), renamedMethodBodies, false);
-    FileHelper.outputToFile(Path.of(dataPath, "Typo", "MethodBodies.txt"), typoMethodBodies, false);
+    FileHelper.outputToFile(Path.of(dataPath, "ActualRenamed", "MethodBodies.txt"), renamedMethodBodies.toString(), false);
+    FileHelper.outputToFile(Path.of(dataPath, "Typo", "MethodBodies.txt"), typoMethodBodies.toString(), false);
   }
 }

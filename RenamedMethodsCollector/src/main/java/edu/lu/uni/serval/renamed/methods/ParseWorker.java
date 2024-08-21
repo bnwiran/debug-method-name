@@ -116,9 +116,9 @@ public class ParseWorker extends UntypedActor {
 	}
 
 	private void writeMethods(int id, StringBuilder builder, StringBuilder methodBodiesBuilder) {
-		FileHelper.outputToFile(Path.of(rootPath, "RenamedMethods", "RenamedMethods_" + id + ".txt"), builder, true);
+		FileHelper.outputToFile(Path.of(rootPath, "RenamedMethods", "RenamedMethods_" + id + ".txt"), builder.toString(), true);
 		builder.setLength(0);
-		FileHelper.outputToFile(Path.of(rootPath, "MethodBodies", "MethodBodies_" + id + ".txt"), methodBodiesBuilder, true);
+		FileHelper.outputToFile(Path.of(rootPath, "MethodBodies", "MethodBodies_" + id + ".txt"), methodBodiesBuilder.toString(), true);
 		methodBodiesBuilder.setLength(0);
 	}
 

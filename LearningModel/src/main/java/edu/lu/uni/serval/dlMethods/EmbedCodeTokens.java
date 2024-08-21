@@ -19,7 +19,7 @@ public class EmbedCodeTokens {
 		FileHelper.deleteFile(outputPath);
 		
 		TokensEmbedder embedder = new TokensEmbedder(inputPath, outputPath);
-		embedder.mergeData(false);
+		embedder.mergeData();
 		embedder.embedTokens();
 		embedder.vectorizedData(true);
 	}

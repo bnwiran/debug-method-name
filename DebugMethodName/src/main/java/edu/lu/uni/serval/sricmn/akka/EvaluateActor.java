@@ -1,18 +1,5 @@
 package edu.lu.uni.serval.sricmn.akka;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -23,6 +10,19 @@ import edu.lu.uni.serval.sricmn.info.MethodInfo;
 import edu.lu.uni.serval.utils.DataReader;
 import edu.lu.uni.serval.utils.FileHelper;
 import edu.lu.uni.serval.utils.MapSorter;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EvaluateActor extends UntypedActor {
 
@@ -481,7 +481,7 @@ public class EvaluateActor extends UntypedActor {
 				count ++;
 				if (count == this.topNum) break;
 			}
-			FileHelper.outputToFile(BODY_SIMILARITIES_FILE_PATH + key + ".txt", builder, false);
+			FileHelper.outputToFile(Path.of(BODY_SIMILARITIES_FILE_PATH, key + ".txt"), builder.toString(), false);
 		}
 		
 		for (Map.Entry<Integer, Map<Integer, Double>> entry : this.topSimilarNameMap.entrySet()) {
@@ -505,7 +505,7 @@ public class EvaluateActor extends UntypedActor {
 				count ++;
 				if (count == this.topNum) break;
 			}
-			FileHelper.outputToFile(NAME_SIMILARITIES_FILE_PATH  + this.similarityType + "_" + (isSubToken ? "SubToken" : "FullName") + "_" + this.fileId + "/" + key + ".txt", builder, false);
+			FileHelper.outputToFile(Path.of(NAME_SIMILARITIES_FILE_PATH, similarityType + "_" + (isSubToken ? "SubToken" : "FullName") + "_" + this.fileId, key + ".txt"), builder.toString(), false);
 		}
 	}
 

@@ -1,17 +1,12 @@
 package edu.lu.uni.serval;
 
-import java.io.BufferedReader;
+import edu.lu.uni.serval.akka.method.parser.MultipleShreadParser;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
-
-import edu.lu.uni.serval.akka.method.parser.MultipleShreadParser;
-import edu.lu.uni.serval.method.parser.MethodParser;
-import edu.lu.uni.serval.utils.FileHelper;
 
 /**
  * Examples of the tool: parse methods.

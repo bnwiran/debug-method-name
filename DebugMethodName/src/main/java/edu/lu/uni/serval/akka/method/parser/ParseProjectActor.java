@@ -201,7 +201,7 @@ public class ParseProjectActor extends UntypedActor {
 	}
 
 	private void mergeData(String type, String fileType) {
-		String outputFileName = outputPath + type + fileType;
+		Path outputFileName = Path.of(outputPath, type + fileType);
 		FileHelper.deleteFile(outputFileName);
 		
 		for (int i = 1; i <= numberOfWorkers; i ++) {

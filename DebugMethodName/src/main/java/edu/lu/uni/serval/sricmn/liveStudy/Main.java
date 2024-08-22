@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import edu.lu.uni.serval.jdt.AST.ASTGenerator;
@@ -64,7 +65,7 @@ public class Main {
 						a ++;
 					}
 //				}
-				FileHelper.outputToFile("../OUTPUT/LiveStudy/results2.txt", allMethods, true);
+				FileHelper.outputToFile(Path.of("..", "OUTPUT", "LiveStudy", "results2.txt"), allMethods.toString(), true);
 			}
 		}
 		
@@ -92,8 +93,12 @@ public class Main {
 				return child.getLabel().substring(11);
 			} else {
 				String name = readEndPositionOfMethodName(child);
-				if (name.equals("")) continue;
-				else return name;
+				if (name.isEmpty()) {
+					continue;
+				}
+				else {
+					return name;
+				}
 			}
 		}
 		return "";

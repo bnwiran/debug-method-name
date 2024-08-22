@@ -1,14 +1,15 @@
 package edu.lu.uni.serval.sricmn.liveStudy;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import edu.lu.uni.serval.sricmn.TokenSuggestor;
 import edu.lu.uni.serval.sricmn.info.MethodInfo;
 import edu.lu.uni.serval.sricmn.info.PredictToken;
 import edu.lu.uni.serval.utils.FileHelper;
 import edu.lu.uni.serval.utils.MapSorter;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class LiveStudyEvl {
 
@@ -20,7 +21,9 @@ public class LiveStudyEvl {
 		int a = 0;
 		for (int index = 0; index < size; index ++) {
 			Map<Integer, Double> bodySimilarities = topSimilarBodyMap.get(index);
-			if (bodySimilarities.size() == 0) continue;
+			if (bodySimilarities.isEmpty()) {
+				continue;
+			}
 			MapSorter<Integer, Double> sorter = new MapSorter<Integer, Double>();
 			bodySimilarities = sorter.sortByValueDescending(bodySimilarities);
 			
@@ -39,7 +42,7 @@ public class LiveStudyEvl {
 				}
 				
 				PredictToken pt = new PredictToken(token.toString().toLowerCase());
-				Integer index1 = ptList.indexOf(pt);
+				int index1 = ptList.indexOf(pt);
 				if (index1 > -1) {
 					pt = ptList.get(index1);
 					pt.setSimilarity(pt.getSimilarity() + similarity);
@@ -50,7 +53,7 @@ public class LiveStudyEvl {
 					ptList.add(pt);
 				}
 				
-				String firstSubToken = similarRawTokens.get(0);
+				String firstSubToken = similarRawTokens.getFirst();
 				if (!tokensPredictedByBodyList.contains(firstSubToken)) {
 					tokensPredictedByBodyList.add(firstSubToken);
 				}
@@ -64,7 +67,7 @@ public class LiveStudyEvl {
 			for (Map.Entry<Integer, Double> entry : nameSimilarities.entrySet()) {
 				int methodIndex = entry.getKey();
 				MethodInfo methodInfo = trainingMethodInfo.get(methodIndex);
-				String token = methodInfo.getMethodNameTokens().get(0);
+				String token = methodInfo.getMethodNameTokens().getFirst();
 				if (!tokensPredictedByNameList.contains(token)) {
 					tokensPredictedByNameList.add(token);
 				}
@@ -74,12 +77,12 @@ public class LiveStudyEvl {
 			
 			boolean isInconsistent = false;
 			if (identifyWithTopOne) {
-				if (!tokensPredictedByBodyList.get(0).equals(tokensPredictedByNameList.get(0))) {
+				if (!tokensPredictedByBodyList.getFirst().equals(tokensPredictedByNameList.getFirst())) {
 					isInconsistent = true;
 				}
 			} else {
 				tokensPredictedByBodyList.retainAll(tokensPredictedByNameList);
-				if (tokensPredictedByBodyList.size() == 0) {
+				if (tokensPredictedByBodyList.isEmpty()) {
 					isInconsistent = true;
 				}
 			}
@@ -98,7 +101,7 @@ public class LiveStudyEvl {
 			}
 		}
 		System.out.println("Identify with top-" + topNum + ", prediction with " + (identifyWithTopOne ? 1 : topNum) + ", sub-tokens: " + numOfPredictTokens + ", inconsistent names: " + a);
-		FileHelper.outputToFile(outputPath + "results.txt", resultsBuilder, false);
+		FileHelper.outputToFile(Path.of(outputPath, "results.txt"), resultsBuilder.toString(), false);
 	}
 
 }

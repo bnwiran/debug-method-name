@@ -56,7 +56,6 @@ public class MethodBodyCodeLearner {
     String rootPath = Configuration.DL_DATA_PATH;
     String inputPath = Configuration.DL_INPUT_DATA_PATH;
     String outputPath = rootPath + "DLoutput_" + nEpochs + "/";
-    File modelFile = new File(outputPath + "CNNoutput.zip");
 
     int batchSize = Configuration.BATCH_SIZE;
 
@@ -75,6 +74,7 @@ public class MethodBodyCodeLearner {
       }
     }
 
+    File modelFile = new File(outputPath + "CNNoutput.zip");
     if (modelFile.exists()) {
       CNNFeatureExtractor learner = new CNNFeatureExtractor(batchSize);
       learner.setOutputPath(outputPath);
@@ -94,7 +94,7 @@ public class MethodBodyCodeLearner {
       learner.setNumOfOutOfLayer2(50);
       learner.setOutputPath(outputPath);
 
-      learner.extracteFeaturesWithCNN();
+      learner.extractFeaturesWithCNN();
 
       learner.setModelFile(modelFile);
       learner.setTestingData(testingDataFile);
@@ -105,8 +105,8 @@ public class MethodBodyCodeLearner {
   static class CNNFeatureExtractor {
 
     private File inputFile;
-    int sizeOfVector = 0;     // The size of a tokens' vector.
-    int sizeOfTokenVec = 0;   // The size of an embedded token vector.
+    private int sizeOfVector = 0;     // The size of a tokens' vector.
+    private int sizeOfTokenVec = 0;   // The size of an embedded token vector.
     private final int batchSize;
     private int sizeOfFeatureVector; // The size of feature vector, which is the extracted features of each instance.
 
@@ -168,7 +168,7 @@ public class MethodBodyCodeLearner {
       this.modelFile = modelFile;
     }
 
-    public void extracteFeaturesWithCNN() throws IOException, InterruptedException {
+    public void extractFeaturesWithCNN() throws IOException, InterruptedException {
       log.info("Load data....");
       RecordReader trainingDataReader = new CSVRecordReader();
       trainingDataReader.initialize(new FileSplit(inputFile));

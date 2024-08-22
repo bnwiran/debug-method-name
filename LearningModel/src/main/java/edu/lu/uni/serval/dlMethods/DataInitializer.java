@@ -307,7 +307,7 @@ public class DataInitializer {
     List<Integer> sizesList = new ArrayList<>();
     String sizesContent = FileHelper.readFile(sizesFile);
     BufferedReader reader = new BufferedReader(new StringReader(sizesContent));
-    String line = null;
+    String line;
     while ((line = reader.readLine()) != null) {
       sizesList.add(Integer.parseInt(line));
     }

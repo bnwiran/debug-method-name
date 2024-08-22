@@ -1,13 +1,5 @@
 package edu.lu.uni.serval.akka.method.parser;
 
-import java.io.File;
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
@@ -15,6 +7,13 @@ import edu.lu.uni.serval.jdt.method.Method;
 import edu.lu.uni.serval.jdt.parser.JavaFileParser;
 import edu.lu.uni.serval.method.parser.MethodParser;
 import edu.lu.uni.serval.method.parser.util.MethodExporter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ParseProjectWorker extends UntypedActor {
 	
@@ -38,7 +37,7 @@ public class ParseProjectWorker extends UntypedActor {
 	}
 
 	@Override
-	public void onReceive(Object message) throws Exception {
+	public void onReceive(Object message) {
 		if (message instanceof ProjectsMessage pro) {
       List<String> projects = pro.getProjects();
 			String outputPath = pro.getOutputPath();
@@ -74,7 +73,9 @@ public class ParseProjectWorker extends UntypedActor {
 						JavaFileParser jfp = new JavaFileParser();
 						jfp.parseJavaFile(projectName, javaFile);
 						List<Method> methods= jfp.getMethods();
-						if (methods.isEmpty()) continue;
+						if (methods.isEmpty()) {
+							continue;
+						}
 						allMethods.addAll(methods);
 						int size = allMethods.size();
 						if (size >= 500) {
@@ -90,7 +91,9 @@ public class ParseProjectWorker extends UntypedActor {
 						JavaFileParser jfp = new JavaFileParser();
 						jfp.parseJavaFile(projectName, new File(javaFilePath));
 						List<Method> methods= jfp.getMethods();
-						if (methods.isEmpty()) continue;
+						if (methods.isEmpty()) {
+							continue;
+						}
 						allMethods.addAll(methods);
 						int size = allMethods.size();
 						if (size >= 500) {
@@ -122,15 +125,10 @@ public class ParseProjectWorker extends UntypedActor {
 	 * 
 	 * @param parsedMethods
 	 * @param outputPath
-	 * @param tokenFileExtension
-	 * @param numericFileExtension
-	 * @param tokenTypes
 	 * @return
 	 */
 	private int exportParsedMethods(List<Method> parsedMethods, String outputPath, int workerId) {
-		int numberOfNonNullMethods = 0;
 		MethodExporter exporter = new MethodExporter(outputPath);
-		numberOfNonNullMethods += exporter.outputMethods(parsedMethods, workerId);
-		return numberOfNonNullMethods;
+    return exporter.outputMethods(parsedMethods, workerId);
 	}
 }

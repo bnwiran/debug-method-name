@@ -24,15 +24,11 @@ public class JavaFileParser {
 	private String packageName;
 	private CompilationUnit unit = null;
 	private File javaFile;
-	private List<Method> methods = new ArrayList<>();
+	private final List<Method> methods = new ArrayList<>();
 	private boolean ignoreGetterAndSetterMethods = false;
 
 	public List<Method> getMethods() {
 		return methods;
-	}
-
-	public void setIgnoreGetterAndSetterMethods(boolean ignoreGetterAndSetterMethods) {
-		this.ignoreGetterAndSetterMethods = ignoreGetterAndSetterMethods;
 	}
 
 	public void parseJavaFile(String projectName, File file) {
@@ -158,7 +154,6 @@ public class JavaFileParser {
 
 	/**
 	 * Read method body code.
-	 * @param methodBodyTree
 	 * @return
 	 */
 	private String getMethodSourceCode(int startPos, int endPos) {

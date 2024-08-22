@@ -48,52 +48,6 @@ public class MainParser {
 			e.printStackTrace();
 		}
 	}
-
-	/**
-	 * Parse method bodies: tokenize and vectorize method bodies.
-	 * 
-	 * @throws IOException
-	 */
-	public void parseMethodsWithSingleThread() throws IOException {
-		List<String> projects = Configuration.PROJECTS;
-
-		String outputPath = Configuration.TOKENIZED_METHODS_PATH;
-		// Clear existing output data generated at the last time.
-		FileHelper.deleteFile(outputPath);
-
-		MethodParser mp = new MethodParser();
-		mp.parseProjects(projects, outputPath);
-	}
-	
-	/**
-	 * Parse method bodies with multiple threads.
-	 * 
-	 * One thread is used to parse one project.
-	 * 
-	 * @throws IOException
-	 */
-	public void parseMethodsWithMultipleThreads() throws IOException {
-		List<String> projects = Configuration.PROJECTS;
-
-		String outputPath = Configuration.TOKENIZED_METHODS_PATH;
-		// Clear existing output data generated at the last time.
-		FileHelper.deleteFile(outputPath);
-
-		int numberOfWorkers = 430;
-		MultipleShreadParser parser = new MultipleShreadParser(projects, outputPath, numberOfWorkers);
-		parser.parseMethods();
-	}
-	
-	/**
-	 * Parse method bodies with multiple threads.
-	 * @throws IOException
-	 */
-	public void parseMethodsWithMultipleThreads(String allJavaFilesFile) throws IOException {
-		String outputPath = Configuration.TOKENIZED_METHODS_PATH;
-		int numberOfWorkers = 1000;
-		MultipleShreadParser parser = new MultipleShreadParser(allJavaFilesFile, outputPath, numberOfWorkers);
-		parser.parseMethods();
-	}
 	
 	/**
 	 * Parse method bodies with multiple threads.

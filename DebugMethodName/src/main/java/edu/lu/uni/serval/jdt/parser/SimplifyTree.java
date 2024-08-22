@@ -5,7 +5,6 @@ import java.util.List;
 
 import edu.lu.uni.serval.jdt.tree.ITree;
 import edu.lu.uni.serval.utils.ASTNodeMap;
-import edu.lu.uni.serval.utils.Checker;
 
 /**
  * Simplify the ITree of source code into a simple tree.
@@ -22,7 +21,7 @@ public class SimplifyTree {
 		String astNode = ASTNodeMap.map.get(tree.getType());
 
 		List<ITree> children = tree.getChildren();
-		if (children.size() > 0) {
+		if (!children.isEmpty()) {
 			simpleTree.setNodeType(astNode);
 			if (astNode.endsWith("Type")) {
 				simpleTree.setLabel(label.replace(" ", ""));
@@ -109,7 +108,7 @@ public class SimplifyTree {
 		String astNode = ASTNodeMap.map.get(tree.getType());
 
 		List<ITree> children = tree.getChildren();
-		if (children.size() > 0) {
+		if (!children.isEmpty()) {
 			simpleTree.setNodeType(astNode);
 			if (astNode.endsWith("Type")) {
 				simpleTree.setLabel(canonicalizeTypeStr(label).replaceAll(" ", ""));
@@ -326,100 +325,4 @@ public class SimplifyTree {
 		}
 		return typeStr;
 	}
-
-	public SimpleTree simplifyTreeWithoutBodyCode(ITree tree, SimpleTree parent) {
-		SimpleTree simpleTree = new SimpleTree();
-
-		String label = tree.getLabel();
-		String astNode = ASTNodeMap.map.get(tree.getType());
-
-		List<ITree> children = tree.getChildren();
-		if (children.size() > 0) {
-			simpleTree.setNodeType(astNode);
-			if (astNode.endsWith("Type")) {
-				simpleTree.setLabel(label.replace(" ", ""));
-			} else {
-				if ((astNode.equals("SimpleName") || astNode.equals("MethodInvocation"))) {
-					if (label.startsWith("MethodName:")) {
-						simpleTree.setNodeType("MethodName");
-						label = label.substring(11);
-						int argusIndex = label.indexOf(":[");
-						if (argusIndex > 0) {
-							label = label.substring(0, argusIndex);
-						}
-					} else if (label.startsWith("ClassName:")) {
-						simpleTree.setNodeType("ClassName");
-						label = label.substring(10);
-					}
-					simpleTree.setLabel(label);
-				} else {
-					simpleTree.setLabel(astNode);
-				}
-				List<SimpleTree> subTrees = new ArrayList<>();
-				if ("DoStatement".equals(astNode)) {
-					for (ITree child : children) {
-						if (Checker.isStatement(child.getType())) continue;
-						subTrees.add(simplifyTree(child, simpleTree));
-					}
-				} else {
-					for (ITree child : children) {
-						if (Checker.isStatement(child.getType())) break;
-						subTrees.add(simplifyTree(child, simpleTree));
-					}
-				}
-				simpleTree.setChildren(subTrees);
-			}
-		} else {
-			if (astNode.endsWith("Name")) {
-				// variableName, methodName, QualifiedName
-				if (label.startsWith("MethodName:")) { // <MethodName, name>
-					simpleTree.setNodeType("MethodName");
-					label = label.substring(11);
-					int argusIndex = label.indexOf(":[");
-					if (argusIndex > 0) {
-						label = label.substring(0, argusIndex);
-					}
-					simpleTree.setLabel(label);
-				} else if (label.startsWith("ClassName:")) {
-					simpleTree.setNodeType("ClassName");
-					label = label.substring(10);
-					simpleTree.setLabel(label);
-				} else if (label.startsWith("Name:")) {
-					label = label.substring(5);
-					char firstChar = label.charAt(0);
-					if (Character.isUpperCase(firstChar)) {
-						simpleTree.setNodeType("Name");
-						simpleTree.setLabel(label);
-					} else {// variableName: <VariableName, canonicalName>
-						simpleTree.setNodeType("VariableName");
-						simpleTree.setLabel(label);
-					}
-				} else {// variableName: <VariableName, canonicalName>
-					simpleTree.setNodeType("VariableName");
-					simpleTree.setLabel(label);
-				}
-			} else {
-				simpleTree.setNodeType(astNode);
-				if (astNode.endsWith("Type")) {
-					simpleTree.setLabel(label.replace(" ", ""));
-				} else if (astNode.startsWith("Type")) {
-					simpleTree.setLabel(label.replace(" ", ""));
-				} else if ((astNode.equals("SimpleName") || astNode.equals("MethodInvocation")) && label.startsWith("MethodName:")) {
-					simpleTree.setNodeType("MethodName");
-					label = label.substring(11);
-					int argusIndex = label.indexOf(":[");
-					if (argusIndex > 0) {
-						label = label.substring(0, argusIndex);
-					}
-					simpleTree.setLabel(label);
-				} else {
-					simpleTree.setLabel(label.replaceAll(" ", ""));
-				}
-			}
-		}
-		
-		simpleTree.setParent(parent);
-		return simpleTree;
-	}
-
 }

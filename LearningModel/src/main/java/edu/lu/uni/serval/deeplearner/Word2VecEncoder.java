@@ -60,37 +60,4 @@ public class Word2VecEncoder {
     WordVectorSerializer.writeWordVectors(vec, outputFileName.toFile());
     log.info("****************Finish off embedding****************\n");
   }
-
-  public static void main(String[] args) throws FileNotFoundException {
-    Path embeddingInputData = Paths.get("C:\\AI\\projects\\debug-method-name\\Data\\Output\\DL_Data", "embedding", "inputData.txt");
-    SentenceIterator iter = new BasicLineIterator(embeddingInputData.toFile());
-    TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
-    tokenizerFactory.setTokenPreProcessor(new MyTokenPreprocessor());
-
-    Word2Vec vec = new Word2Vec.Builder()
-      .epochs(1)
-//        		.batchSize(100)
-//        		.useAdaGrad(reallyUse)
-      .iterations(1)
-      .learningRate(.01)
-      .seed(50)
-      .windowSize(4)
-      .minWordFrequency(1)
-      .layerSize(300)
-      .iterate(iter)
-      .tokenizerFactory(tokenizerFactory)
-      .build();
-
-    vec.fit();
-
-//    if(iter.hasNext()) {
-//      String sentence = iter.nextSentence();
-//      System.out.println(sentence);
-//      Tokenizer tokenizer = tokenizerFactory.create(sentence);
-//
-//      while(tokenizer.hasMoreTokens()) {
-//        System.out.println(tokenizer.nextToken());
-//      }
-//    }
-  }
 }

@@ -52,6 +52,17 @@ public class MethodBodyCodeLearner {
   private static Logger log = LoggerFactory.getLogger(CNNFeatureExtractor.class);
 
   public static void main(String[] args) throws IOException, InterruptedException {
+    RecordReader trainingDataReader = new CSVRecordReader();
+    trainingDataReader.initialize(new FileSplit(new File("C:\\AI\\projects\\debug-method-name\\Data\\Output\\DL_Data\\DLinput\\TrainingData_Tokens_MaxSize=68.csv")));
+    DataSetIterator trainingDataIter = new RecordReaderDataSetIterator(trainingDataReader, 1);
+
+    System.out.println(trainingDataReader.getLabels());
+    if(trainingDataIter.hasNext()) {
+      DataSet next = trainingDataIter.next();
+      System.out.println(next.getLabels());
+    }
+  }
+  public static void main2(String[] args) throws IOException, InterruptedException {
     int nEpochs = 1;//Integer.valueOf(args[0]);//1, 10, 20
     String rootPath = Configuration.DL_DATA_PATH;
     String inputPath = Configuration.DL_INPUT_DATA_PATH;

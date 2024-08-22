@@ -30,7 +30,7 @@ public class MainParser {
 			List<String> projects = readList(reposFileName);
 			int i = Integer.parseInt(args[1]); // 0 - 429: 430 Java projects.
 			if (i >= projects.size()) {
-				System.out.println("Wrong parameter: " + args[0]);
+				System.out.println("Wrong parameter: " + args[1]);
 				return;
 			}
 			String projectName = projects.get(i);

@@ -42,7 +42,7 @@ How to run debug-method-name
   - `mvn dependency:copy-dependencies`
   - `mvn package`
   - `mv target/DebugMethodName-0.0.1-SNAPSHOT.jar target/dependency`
-  - `java -cp "target/dependency/*" -Xmx8g edu.lu.uni.serval.MainParser <Java_Project_Index>`, `<Java_Project_Index>` is the index of a Java project in the Java project list (`repos.txt`).
+  - `java -cp "DebugMethodName/target/dependency/*" -Xmx8g edu.lu.uni.serval.MainParser <repos_file_name> <Java_Project_Index>`, `<Java_Project_Index>` is the index of a Java project in the Java project list (`repos.txt`).
   
 6. Prepare data: Prepare data for deep learning of methods.	
   - `cd ../LearningModel`

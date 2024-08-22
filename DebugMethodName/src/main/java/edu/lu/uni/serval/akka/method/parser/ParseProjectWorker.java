@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ParseProjectWorker extends UntypedActor {
 	
@@ -47,10 +48,10 @@ public class ParseProjectWorker extends UntypedActor {
 			int numberOfNonNullMethods = 0;
 			MethodParser parser = new MethodParser();
 			
-			if (projects != null) {
+			if (Objects.nonNull(projects)) {
 				for (String project : projects) {
-					List<Method> methods = parser.parseMethods(project);// samples, examples
-					if (methods != null) {
+					List<Method> methods = parser.parseMethods(project);
+					if (Objects.nonNull(methods)) {
 						int size = methods.size(); 
 						if (size > 0) {
 							numberOfMethods += size;
@@ -68,7 +69,7 @@ public class ParseProjectWorker extends UntypedActor {
 				List<Method> allMethods = new ArrayList<>();
 				String projectName = projectPath.substring(projectPath.lastIndexOf("/") + 1);
 				
-				if (javaFiles != null) {
+				if (Objects.nonNull(javaFiles)) {
 					for (File javaFile : javaFiles) {
 						JavaFileParser jfp = new JavaFileParser();
 						jfp.parseJavaFile(projectName, javaFile);

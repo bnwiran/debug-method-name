@@ -53,14 +53,13 @@ public class ParseProjectActor extends UntypedActor {
 
 	@Override
 	public void onReceive(Object message) {
-		if (message instanceof ProjectsMessage) {
+		if (message instanceof ProjectsMessage projMsg) {
 			logger.info("****************Start to parse methods****************\n");
-			ProjectsMessage projMsg = (ProjectsMessage) message;
-			List<String> projectList = projMsg.getProjects();
+      List<String> projectList = projMsg.getProjects();
 			String project = projMsg.getProject();
 			outputPath = projMsg.getOutputPath();
 			
-			if (project == null) {
+			if (Objects.isNull(project)) {
 				// Parse methods project by project.
 				int size = projectList.size();
 				int average = size / numberOfWorkers;

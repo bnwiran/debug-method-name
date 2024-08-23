@@ -1,16 +1,15 @@
 package edu.lu.uni.serval.gumtree.regroup;
 
+import com.github.gumtreediff.actions.model.Action;
+import com.github.gumtreediff.tree.ITree;
+import edu.lu.uni.serval.utils.ASTNodeMap;
+import edu.lu.uni.serval.utils.Checker;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.github.gumtreediff.actions.model.Action;
-import com.github.gumtreediff.tree.ITree;
-
-import edu.lu.uni.serval.utils.ASTNodeMap;
-import edu.lu.uni.serval.utils.Checker;
-import edu.lu.uni.serval.utils.ListSorter;
+import java.util.Objects;
 
 /**
  * Simplify the ITree of source code into a simple tree.
@@ -25,10 +24,10 @@ public class SimplifyTree {
 	private static final String ABSTRACT_METHOD = "m";
 	private static final String ABSTRACT_VARIABLE = "v";
 	
-	private Map<String, String> abstractTypeIdentifiers = new HashMap<>();
-	private Map<String, String> abstractMethodIdentifiers = new HashMap<>();
-	private Map<String, String> abstractNameIdentifiers = new HashMap<>();
-	private Map<String, String> abstractVariableIdentifiers = new HashMap<>();
+	private final Map<String, String> abstractTypeIdentifiers = new HashMap<>();
+	private final Map<String, String> abstractMethodIdentifiers = new HashMap<>();
+	private final Map<String, String> abstractNameIdentifiers = new HashMap<>();
+	private final Map<String, String> abstractVariableIdentifiers = new HashMap<>();
 
 	/**
 	 * Convert ITree to a source code simple tree, an abstract identifier simple tree, and a semi-source code simple tree.
@@ -77,9 +76,7 @@ public class SimplifyTree {
 				}
 				tree.setChildren(newChildren);
 			}
-//			sourceCodeSimpleTree = originalSourceCodeTree(tree, null);
-//			abstractIdentifierTree = abstractIdentifierTree(actionSet, tree, null);
-//			abstractSimpleTree = semiSourceCodeTree(actionSet, tree, null);
+
 			simpleTree = canonicalizeSourceCodeTree(tree, null);
 		}
 		
@@ -124,26 +121,6 @@ public class SimplifyTree {
 			}
 		} else {
 			ITree tree = actionSet.getNode();
-//			String astNodeType = actionSet.getAstNodeType();
-//			if (Checker.containsBodyBlock(astNodeType)) {
-//				// delete the body block.
-//				List<ITree> children = tree.getChildren();
-//				List<ITree> newChildren = new ArrayList<>();
-//				for (ITree child : children) {
-//					if (!child.getLabel().endsWith("Body")) {
-//						newChildren.add(child);
-//					}
-//				}
-//				tree.setChildren(newChildren);
-//			}
-//			sourceCodeSimpleTree = originalSourceCodeTree(tree, null);
-//			abstractIdentifierTree = abstractIdentifierTree(actionSet, tree, null);
-//			abstractSimpleTree = semiSourceCodeTree(actionSet, tree, null);
-//			if (actionSet.getActionString().startsWith("UPD")) {
-//				simpleTree = canonicalizeSourceCodeTree(tree, null, bugEndPosition);
-//			} else {
-//				simpleTree = canonicalizeSourceCodeTree(tree, null);
-//			}
 			simpleTree = canonicalizeSourceCodeTree(tree, null, bugEndPosition);
 		}
 		
@@ -261,7 +238,7 @@ public class SimplifyTree {
 		String astNode = ASTNodeMap.map.get(tree.getType());
 
 		List<ITree> children = tree.getChildren();
-		if (children.size() > 0) {
+		if (!children.isEmpty()) {
 			simpleTree.setNodeType(astNode);
 			if (astNode.endsWith("Type")) {
 				simpleTree.setLabel(canonicalizeTypeStr(label).replaceAll(" ", ""));
@@ -479,52 +456,6 @@ public class SimplifyTree {
 		}
 		return typeStr;
 	}
-
-//	public static String addPrefixByType(Type type) {
-//		String newName = "";
-//		if (type instanceof PrimitiveType) {
-//			// byte,short,char,int,long,float,double,boolean,void
-//			newName = type.toString().toLowerCase();
-//		} else if (type instanceof ArrayType) {
-//			// Type [ ]
-//			ArrayType at = (ArrayType) type;
-//			type = at.getElementType();
-//			if (type instanceof SimpleType || type instanceof PrimitiveType) {
-//				newName = getNewName(type);
-//			} else {
-//				newName = addPrefixByType(type);
-//			}
-//		} else if (type instanceof SimpleType) {
-//			// TypeName
-//			if (type.toString().equals("Integer")) {
-//				newName = "int";
-//			} else {
-//				newName = getNewName(type);
-//			}
-//		} else if (type instanceof QualifiedType) {
-//			// Type.SimpleName
-//			newName = ((QualifiedType) type).getName().toString().toLowerCase();
-//		} else if (type instanceof ParameterizedType) {
-//			// Type < Type { , Type } > 泛型
-//			ParameterizedType t = (ParameterizedType) type;
-//			newName = getNewName(t.getType());
-//		} else if (type instanceof WildcardType) {
-//			newName = "object";
-//		} 
-//		return newName;
-//	}
-//	
-//	private static String getNewName(Type type) {
-//		String newName = "";
-//		String typeName = type.toString();
-//		int dot = typeName.lastIndexOf(".");
-//		if (dot > 0) {
-//			newName = typeName.substring(dot + 1).toString().toLowerCase();
-//		} else {
-//			newName = typeName.toString().toLowerCase();
-//		}
-//		return newName;
-//	}
 	
 	/**
 	 * Convert the Move actions of an INS action into a simple tree with AST nodes and leaf labels.
@@ -570,7 +501,7 @@ public class SimplifyTree {
 
 		String label = tree.getLabel();
 		List<ITree> children = tree.getChildren();
-		if (children.size() > 0) {
+		if (!children.isEmpty()) {
 			List<SimpleTree> subTrees = new ArrayList<>();
 			for (ITree child : children) {
 				subTrees.add(sourceCodeTree(child, simpleTree));
@@ -601,7 +532,7 @@ public class SimplifyTree {
 
 		simpleTree.setNodeType(astNode);
 		List<ITree> children = tree.getChildren();
-		if (children.size() > 0) {
+		if (!children.isEmpty()) {
 			List<SimpleTree> subTrees = new ArrayList<>();
 			for (ITree child : children) {
 				subTrees.add(originalSourceCodeTree(child, simpleTree));
@@ -618,8 +549,7 @@ public class SimplifyTree {
 
 	/**
 	 * Convert an UPD/DEL/MOV action into a simple tree with abstract identifiers of AST nodes and abstract identifiers of leaf labels.
-	 * 
-	 * @param actionSet
+	 *
 	 * @param tree
 	 * @param parent
 	 * @return
@@ -633,7 +563,7 @@ public class SimplifyTree {
 
 		simpleTree.setNodeType(astNode);
 		List<ITree> children = tree.getChildren();
-		if (children.size() > 0) {
+		if (!children.isEmpty()) {
 			if (astNode.endsWith("Type")) {
 				simpleTree.setNodeType("Type");
 				simpleTree.setLabel(getAbstractLabel(abstractTypeIdentifiers, label, ABSTRACT_TYPE)); // abstract Type identifier
@@ -765,13 +695,8 @@ public class SimplifyTree {
 		String astNodeType = actionSet.getAstNodeType();
 		if (Checker.containsBodyBlock(astNodeType)) {
 			List<Action> allMoveActions = getAllMoveActions2(actionSet);
-			if (allMoveActions != null && allMoveActions.size() > 0) {
-				ListSorter<Action> sorter = new ListSorter<Action>(allMoveActions);
-				List<Action> moveActions = sorter.sortAscending();
-				if (moveActions != null) {
-					allMoveActions = moveActions;
-				}
-				return allMoveActions;
+			if (Objects.nonNull(allMoveActions) && !allMoveActions.isEmpty()) {
+        return allMoveActions.stream().sorted().toList();
 			} else {// FIXME: pure INS actions.
 				return null;
 			}

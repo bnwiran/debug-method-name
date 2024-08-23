@@ -13,7 +13,7 @@ import java.util.Scanner;
 import edu.lu.uni.serval.utils.FileHelper;
 
 public class RenamedMethodSelector {
-	public String renamedMethodsPath;
+	private final String renamedMethodsPath;
 	
 	// Method info of renamed methods.
 	public List<String> methodInfoOfRenamedMethods = new ArrayList<>();
@@ -22,7 +22,10 @@ public class RenamedMethodSelector {
 	// parsed old method names @ parsed new method names: of selected renamed methods
 	public List<String> parsedRenamedMethodNames = new ArrayList<>();
 	public List<Integer> indexesOfSelectedMethods = new ArrayList<>();
-	
+
+	public RenamedMethodSelector(String renamedMethodsPath) {
+		this.renamedMethodsPath = renamedMethodsPath;
+	}
 	/**
 	 * Select renamed methods by their first tokens and sizes.
 	 * @throws IOException 

@@ -12,12 +12,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * Figure out the common first tokens of all method names.
@@ -36,62 +38,58 @@ public class DataInitializer {
   public String renamedMethodsPath;
 
   // First token list of all methods.
-  List<String> allFirstTokensList = new ArrayList<>();
+  // private List<String> allFirstTokensList = new ArrayList<>();
   // Tokens of all parsed method names.
-  List<String> tokenVectorOfAllParsedMethodNames = new ArrayList<>();
+  private List<String> tokenVectorOfAllParsedMethodNames = new ArrayList<>();
   // Common first tokens of all methods.
-  List<String> commonFirstTokens = new ArrayList<>();
+  // private List<String> commonFirstTokens = new ArrayList<>();
   // Sizes of all method token vectors.
-  List<Integer> sizesListOfAllMethodBodyTokenVectors = new ArrayList<>();
+  private List<Integer> sizesListOfAllMethodBodyTokenVectors = new ArrayList<>();
   // Threshold of method token vectors sizes for selecting methods.
-  int maxSize = 0;
+  private int maxSize = 0;
 
   // Method info of renamed methods.
-  List<String> methodInfoOfRenamedMethods = new ArrayList<>();
+  private List<String> methodInfoOfRenamedMethods = new ArrayList<>();
   // Method body token vectors of renamed methods.
-  List<String> tokenVectorsOfRenamedMethods = new ArrayList<>();
+  private List<String> tokenVectorsOfRenamedMethods = new ArrayList<>();
   // parsed old method names @ parsed new method names: of selected renamed methods
-  List<String> parsedRenamedMethodNames = new ArrayList<>();
+  private List<String> parsedRenamedMethodNames = new ArrayList<>();
 
   // Sizes of selected method token vectors.
 //	List<Integer> selectedSizesList = new ArrayList<>();
   // Selected parsed method names of all methods.
 //	List<String> selecteParsedMethodNames = new ArrayList<>();
   // selected token vectors of all methods.
-  List<String> selectedTokenVecotrsOfAllMethods = new ArrayList<>();
+  private final List<String> selectedTokenVecotrsOfAllMethods = new ArrayList<>();
   // Selected method info of all methods.
-  List<String> selectedMethodInfoOfAllMethods = new ArrayList<>();
+  private final List<String> selectedMethodInfoOfAllMethods = new ArrayList<>();
 
-  List<Integer> selectMethodIndexes = new ArrayList<>();
-  List<Integer> trainingMethodIndexes = new ArrayList<>();
-  List<Integer> testingMethodIndexes = new ArrayList<>();
-  List<Integer> selecteRenamedMethodIndexes = new ArrayList<>();
-  List<Integer> furtherSelecteRenamedMethodIndexes = new ArrayList<>();
+  private final List<Integer> selectMethodIndexes = new ArrayList<>();
+  private List<Integer> selectedRenamedMethodIndexes = new ArrayList<>();
+  private final List<Integer> furtherSelectedRenamedMethodIndexes = new ArrayList<>();
 
   public void initializeData(List<String> projects) throws IOException {
     // Common first tokens of all methods.
-    CommonFirstTokens cft = new CommonFirstTokens();
-    cft.inputPath = this.inputPath;
-    cft.outputPath = this.outputPath1;
+    CommonFirstTokens cft = new CommonFirstTokens(inputPath, outputPath1);
     cft.QUANTITY = this.QUANTITY;
     // Read the distribution of first tokens to get the common first tokens.
     cft.readTokens();
     // Select common first tokens.
     cft.outputTokens();
-    this.allFirstTokensList = cft.allFirstTokensList;
+    //this.allFirstTokensList = cft.allFirstTokensList;
     this.tokenVectorOfAllParsedMethodNames = cft.tokenVectorOfAllParsedMethodNames;
-    this.commonFirstTokens = cft.commonFirstTokens;
+    //this.commonFirstTokens = cft.commonFirstTokens;
 
 
     File sizesFile = Paths.get(Configuration.TOKENIZED_METHODS_PATH, "sizes.csv").toFile();
     if (!sizesFile.exists()) {
       // Merge sizes files.
       for (String project : projects) {
-        String sizeFile = Configuration.TOKENIZED_METHODS_PATH + project + "/sizes.csv";
-        if (!new File(sizeFile).exists()) {
+        File sizeFile = Paths.get(Configuration.TOKENIZED_METHODS_PATH, project, "sizes.csv").toFile();
+        if (!sizeFile.exists()) {
             continue;
         }
-        FileHelper.outputToFile(sizesFile.toPath(), FileHelper.readFile(Paths.get(sizeFile).toFile()), true);
+        FileHelper.outputToFile(sizesFile.toPath(), FileHelper.readFile(sizeFile), true);
       }
     }
 
@@ -103,13 +101,12 @@ public class DataInitializer {
     }
 
     // Select the renamed methods of which names start with one of the common first token.
-    RenamedMethodSelector rms = new RenamedMethodSelector();
-    rms.renamedMethodsPath = renamedMethodsPath;
+    RenamedMethodSelector rms = new RenamedMethodSelector(renamedMethodsPath);
     rms.selectRenamedMethods(null, MIN_SIZE, maxSize);
     this.methodInfoOfRenamedMethods = rms.methodInfoOfRenamedMethods;
     this.tokenVectorsOfRenamedMethods = rms.tokenVectorsOfRenamedMethods;
     this.parsedRenamedMethodNames = rms.parsedRenamedMethodNames; // oldName@newName
-    this.selecteRenamedMethodIndexes = rms.indexesOfSelectedMethods;
+    this.selectedRenamedMethodIndexes = rms.indexesOfSelectedMethods;
   }
 
   /**
@@ -163,9 +160,9 @@ public class DataInitializer {
           // selected renamed methods.
           String renamedTokens = this.tokenVectorsOfRenamedMethods.get(renamedIndex);
           if (renamedTokens.equals(tokens)) {
-            int index2 = this.selecteRenamedMethodIndexes.get(renamedIndex);
-            if (!this.furtherSelecteRenamedMethodIndexes.contains(index2)) {
-              this.furtherSelecteRenamedMethodIndexes.add(index2);
+            int index2 = this.selectedRenamedMethodIndexes.get(renamedIndex);
+            if (!this.furtherSelectedRenamedMethodIndexes.contains(index2)) {
+              this.furtherSelectedRenamedMethodIndexes.add(index2);
               selectedParseRenamedMethodNames.append(this.parsedRenamedMethodNames.get(renamedIndex)).append("\n");
               methodInfoBuilderOfSelectedRenamedMethods.append(methodInfo).append("\n");
               tokensBuilderOfSelectedRenamedMethods.append(renamedTokens).append("\n");
@@ -194,7 +191,6 @@ public class DataInitializer {
           methodInfoBuilder.setLength(0);
         }
       }
-//			}
     }
     scanner.close();
     fis.close();
@@ -214,7 +210,7 @@ public class DataInitializer {
     FileHelper.outputToFile(Paths.get(outputPath2, "MethodInfo.txt"), methodInfoBuilderOfSelectedRenamedMethods.toString(), false);
     FileHelper.outputToFile(Paths.get(outputPath2, "ParsedMethodNames.txt"), selectedParseRenamedMethodNames.toString(), false);
 
-    System.out.println("Number of further selected renamed methods:" + furtherSelecteRenamedMethodIndexes.size());
+    System.out.println("Number of further selected renamed methods:" + furtherSelectedRenamedMethodIndexes.size());
     System.out.println("Number of selected training methods:" + this.selectedMethodInfoOfAllMethods.size());
     System.out.println("Renamed methods: " + a);
     System.out.println("Test methods: " + test);
@@ -279,7 +275,7 @@ public class DataInitializer {
       String line = scanner.nextLine();
       if ("#METHOD_BODY#========================".equals(line)) {
         if (isMethodBody) {
-          if (this.furtherSelecteRenamedMethodIndexes.contains(index)) {
+          if (this.furtherSelectedRenamedMethodIndexes.contains(index)) {
             testMethods.append(singleMethod.toString().replace("@Override", "")).append("\n");
             counter++;
           }
@@ -295,7 +291,7 @@ public class DataInitializer {
     }
     scanner.close();
     fis.close();
-    if (this.furtherSelecteRenamedMethodIndexes.contains(index)) {
+    if (this.furtherSelectedRenamedMethodIndexes.contains(index)) {
       counter++;
       testMethods.append(singleMethod.toString().replace("@Override", "")).append("\n");
     }
@@ -304,16 +300,9 @@ public class DataInitializer {
   }
 
   private List<Integer> readSizes(File sizesFile) throws IOException {
-    List<Integer> sizesList = new ArrayList<>();
-    String sizesContent = FileHelper.readFile(sizesFile);
-    BufferedReader reader = new BufferedReader(new StringReader(sizesContent));
-    String line;
-    while ((line = reader.readLine()) != null) {
-      sizesList.add(Integer.parseInt(line));
-    }
-    reader.close();
-
-    return sizesList;
+    return Files.readAllLines(sizesFile.toPath())
+      .stream()
+      .map(Integer::parseInt)
+      .collect(Collectors.toList());
   }
-
 }

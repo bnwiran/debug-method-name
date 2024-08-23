@@ -7,6 +7,7 @@ import edu.lu.uni.serval.utils.ReturnType.ReturnTypeClassification;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,8 +16,8 @@ import java.util.Map;
 
 public class CommonFirstTokens {
 	
-	public String inputPath;
-	public String outputPath;
+	private String inputPath;
+	private String outputPath;
 	public int QUANTITY = 1000;// or 500, the number of methods of which names start with the same token.
 	
 	/**
@@ -33,14 +34,19 @@ public class CommonFirstTokens {
 	public List<String> tokenVectorOfAllParsedMethodNames = new ArrayList<>();
 	// Common first tokens of all methods.
 	public List<String> commonFirstTokens = new ArrayList<>();
-	
+
+	public CommonFirstTokens(String inputPath, String outputPath) {
+		this.inputPath = inputPath;
+		this.outputPath = outputPath;
+	}
+
 	/**
 	 * Read the distribution of first tokens.
 	 * @throws IOException
 	 */
 	public void readTokens() throws IOException {
-		String parsedMethodNamesFile = inputPath + "ParsedMethodNames.txt";
-		String content = FileHelper.readFile(Paths.get(parsedMethodNamesFile).toFile());
+		Path parsedMethodNamesFile = Paths.get(inputPath, "ParsedMethodNames.txt");
+		String content = FileHelper.readFile(parsedMethodNamesFile.toFile());
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line;
 		StringBuilder builder = new StringBuilder();
@@ -56,13 +62,8 @@ public class CommonFirstTokens {
 			if (indexOfComma > 0) {
 				firstToken = methodNameTokens.substring(0, indexOfComma);
 			} else firstToken = methodNameTokens;
-			
-			Integer value = allFirstTokensDistribution.get(firstToken);
-			if (value == null) {
-				allFirstTokensDistribution.put(firstToken, 1);
-			} else {
-				allFirstTokensDistribution.put(firstToken, value + 1);
-			}
+
+      allFirstTokensDistribution.merge(firstToken, 1, Integer::sum);
 			
 			Map<String, Integer> returnTypeTokens = returnTypes.get(returnType);
 			if (returnTypeTokens == null) {
@@ -70,12 +71,7 @@ public class CommonFirstTokens {
 				returnTypeTokens.put(firstToken, 1);
 				returnTypes.put(returnType, returnTypeTokens);
 			} else {
-				Integer subValue = returnTypeTokens.get(firstToken);
-				if (subValue == null) {
-					returnTypeTokens.put(firstToken, 1);
-				} else {
-					returnTypeTokens.put(firstToken, subValue + 1);
-				}
+        returnTypeTokens.merge(firstToken, 1, Integer::sum);
 			}
 //			methodNameTokens = methodNameTokens.replace(":", ",");
 			

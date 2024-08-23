@@ -1,8 +1,5 @@
 package edu.lu.uni.serval.gumtree.regroup;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.github.gumtreediff.actions.model.Action;
 import com.github.gumtreediff.actions.model.Addition;
 import com.github.gumtreediff.actions.model.Delete;
@@ -10,10 +7,12 @@ import com.github.gumtreediff.actions.model.Insert;
 import com.github.gumtreediff.actions.model.Move;
 import com.github.gumtreediff.actions.model.Update;
 import com.github.gumtreediff.tree.ITree;
-
 import edu.lu.uni.serval.utils.ASTNodeMap;
 import edu.lu.uni.serval.utils.Checker;
-import edu.lu.uni.serval.utils.ListSorter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Regroup GumTree results to a hierarchical construction.
@@ -25,27 +24,18 @@ public class HierarchicalRegrouper {
 	
 	public List<HierarchicalActionSet> regroupGumTreeResults(List<Action> actions) {
 		/*
-		 * First, sort actions by their positions.
-		 */
-//		List<Action> actions = new ListSorter<Action>(actionsArgu).sortAscending();
-//		if (actions == null) {
-//			actions = actionsArgu;
-//		}
-		
-		/*
 		 * Second, group actions by their positions.
 		 */
 		List<HierarchicalActionSet> actionSets = new ArrayList<>();
-		HierarchicalActionSet actionSet = null;
 		for(Action act : actions){
 			Action parentAct = findParentAction(act, actions);
-			if (parentAct == null) {
-				actionSet = createActionSet(act, parentAct, null);
+			if (Objects.isNull(parentAct)) {
+				HierarchicalActionSet actionSet = createActionSet(act, null, null);
 				actionSets.add(actionSet);
 			} else {
-				if (!addToAactionSet(act, parentAct, actionSets)) {
+				if (!addToActionSet(act, parentAct, actionSets)) {
 					// The index of the parent action in the actions' list is larger than the index of this action.
-					actionSet = createActionSet(act, parentAct, null);
+					HierarchicalActionSet actionSet = createActionSet(act, parentAct, null);
 					actionSets.add(actionSet);
 				}
 			}
@@ -151,14 +141,11 @@ public class HierarchicalRegrouper {
 	}
 
 	private void sortSubActions(HierarchicalActionSet actionSet) {
-		ListSorter<HierarchicalActionSet> sorter = new ListSorter<HierarchicalActionSet>(actionSet.getSubActions());
-		List<HierarchicalActionSet> subActions = sorter.sortAscending();
-		if (subActions != null) {
-			actionSet.setSubActions(subActions);
-		}
-	}
+		List<HierarchicalActionSet> subActions = actionSet.getSubActions().stream().sorted().toList();
+    actionSet.setSubActions(subActions);
+  }
 
-	private boolean addToAactionSet(Action act, Action parentAct, List<HierarchicalActionSet> actionSets) {
+	private boolean addToActionSet(Action act, Action parentAct, List<HierarchicalActionSet> actionSets) {
 		for(HierarchicalActionSet actionSet : actionSets) {
 			Action action = actionSet.getAction();
 			
@@ -174,7 +161,7 @@ public class HierarchicalRegrouper {
 					// SubAction range： startPosition2 <= startPosition && startPosition + length <= startP + length2
 					List<HierarchicalActionSet> subActionSets = actionSet.getSubActions();
 					if (subActionSets.size() > 0) {
-						boolean added = addToAactionSet(act, parentAct, subActionSets);
+						boolean added = addToActionSet(act, parentAct, subActionSets);
 						if (added) {
 							return true;
 						} else {

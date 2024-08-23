@@ -1,13 +1,14 @@
 package edu.lu.uni.serval.sricmn;
 
+import edu.lu.uni.serval.sricmn.info.PredictToken;
+import edu.lu.uni.serval.utils.MapSorter;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import edu.lu.uni.serval.sricmn.info.PredictToken;
-import edu.lu.uni.serval.utils.ListSorter;
-import edu.lu.uni.serval.utils.MapSorter;
 
 public class TokenSuggestor {
 	
@@ -38,19 +39,16 @@ public class TokenSuggestor {
 				if (times == entity.getValue()) {
 					ptList3.add(pToken);
 				} else {
-					ListSorter<PredictToken> listSorter = new ListSorter<>(ptList3);
-					ptList3 = listSorter.sortDescending();
-					ptList2.addAll(ptList3);
-					ptList3.clear();
-					ptList3.add(pToken);
+					List<PredictToken> sortedPtList3 = ptList3.stream().sorted(Collections.reverseOrder()).toList();
+					ptList2.addAll(sortedPtList3);
+					sortedPtList3.clear();
+					sortedPtList3.add(pToken);
 				}
 			}
 		}
-		if (ptList3.size() > 0) {
-			ListSorter<PredictToken> listSorter = new ListSorter<>(ptList3);
-			ptList3 = listSorter.sortDescending();
-			ptList2.addAll(ptList3);
-			ptList3.clear();
+		if (!ptList3.isEmpty()) {
+			List<PredictToken> sortedPtList3 = ptList3.stream().sorted(Comparator.reverseOrder()).toList();
+			ptList2.addAll(sortedPtList3);
 		}
 		
 		for (PredictToken pToken : ptList2) {
@@ -67,10 +65,9 @@ public class TokenSuggestor {
 	 */
 	public List<String> selectTop5PredictTokens2(List<PredictToken> ptList) {
 		List<String> tokensList = new ArrayList<>();
-		ListSorter<PredictToken> listSorter = new ListSorter<PredictToken>(ptList);
-		ptList = listSorter.sortDescending();
+		List<PredictToken> sortedPtList = ptList.stream().sorted(Collections.reverseOrder()).toList();
 		
-		for (PredictToken pt : ptList) {
+		for (PredictToken pt : sortedPtList) {
 			tokensList.add(pt.getToken());
 		}
 		

@@ -114,7 +114,7 @@ public class ParseActor extends UntypedActor {
 		Path methodsFile = Path.of(outputPath, "RenamedMethods.txt");
 		FileHelper.deleteFile(methodsFile);
 
-		Path methodBodiesFile = Path.of(outputPath + "MethodBodies.txt");
+		Path methodBodiesFile = Path.of(outputPath, "MethodBodies.txt");
 		FileHelper.deleteFile(methodBodiesFile);
 
 		StringBuilder sizes = new StringBuilder();

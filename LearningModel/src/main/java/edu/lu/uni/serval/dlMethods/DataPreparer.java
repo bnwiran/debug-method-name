@@ -20,17 +20,16 @@ public class DataPreparer {
 	public static void main(String[] args) throws IOException {
 		List<String> projects = readList(args[0]);
 		for (String project : projects) {
-			String inputPath = Configuration.TOKENIZED_METHODS_PATH + project + "/";
+			String inputPath = Configuration.TOKENIZED_METHODS_PATH + project;
 			String renamedMethodsPath = Configuration.RENAMED_METHODS_PATH + project + "/ActualRenamed/";
-			String outputPath1 = Configuration.SELECTED_DATA_PATH + project + "/";
+			String selectedDataPath = Configuration.SELECTED_DATA_PATH + project + "/";
 			String outputPath2 = Configuration.SELECTED_RENAMED_DATA_PATH + project + "/";
 
-			DataInitializer dataInit = new DataInitializer();
+			DataInitializer dataInit = new DataInitializer(inputPath);
 			dataInit.QUANTITY = QUANTITY;
 			dataInit.MIN_SIZE = MIN_SIZE;
-			dataInit.inputPath = inputPath;
-			dataInit.outputPath1 = outputPath1;
-			dataInit.outputPath2 = outputPath2;
+			dataInit.selectedDataPath = selectedDataPath;
+			dataInit.selectedRenamedDataPath = outputPath2;
 			dataInit.renamedMethodsPath = renamedMethodsPath;
 			dataInit.initializeData(projects);
 			dataInit.selectMethod();
@@ -47,5 +46,4 @@ public class DataPreparer {
 					return line[line.length - 1].substring(0, index);
 				}).collect(Collectors.toList());
 	}
-
 }

@@ -22,10 +22,9 @@ public class JavaFileParser {
 	
 	private String projectName;
 	private String packageName;
-	private CompilationUnit unit = null;
-	private File javaFile;
+  private File javaFile;
 	private final List<Method> methods = new ArrayList<>();
-	private boolean ignoreGetterAndSetterMethods = false;
+	private final boolean ignoreGetterAndSetterMethods = false;
 
 	public List<Method> getMethods() {
 		return methods;
@@ -34,7 +33,8 @@ public class JavaFileParser {
 	public void parseJavaFile(String projectName, File file) {
 		this.javaFile = file;
 		this.projectName = projectName;
-		unit = new MyUnit().createCompilationUnit(file);
+    CompilationUnit unit = new MyUnit().createCompilationUnit(file);
+
 		try {
 			packageName = unit.getPackage().getName().toString();
 		} catch (Exception e) {
@@ -83,7 +83,7 @@ public class JavaFileParser {
 		String classNameLabel = "";
 		List<ITree> children = classNameTree.getChildren();
 		for (ITree child : children) {
-			if (Checker.isSimpleName(child.getType())) { // SimpleName
+			if (Checker.isSimpleName(child.getType())) {
 				classNameLabel = child.getLabel();
 				break;
 			}
@@ -105,20 +105,24 @@ public class JavaFileParser {
 		if (index > 0) {
 			returnType = returnType.substring(0, index - 2);
 		}
-		if ("=CONSTRUCTOR=".equals(returnType)) {// Constructor.
+		if ("=CONSTRUCTOR=".equals(returnType)) {
 			isConstructor = true;
 		}
 		
 		int startPosition = methodBodyTree.getPos();
 		int endPosition = startPosition + methodBodyTree.getLength();
 		
-		String methodBodySourceCode = getMethodSourceCode(startPosition, endPosition);//getMethodSourceCode(methodBodyTree, startLine, endLine);
+		String methodBodySourceCode = getMethodSourceCode(startPosition, endPosition);
 		
 		MethodBodyTreeReader reader = new MethodBodyTreeReader();
 		reader.readToken(methodBodyTree);
 		String arguments = reader.argus;
 		SimpleTree methodBodySimpleTree = reader.methodBodyStatementTrees;
-		if (methodBodySimpleTree.getChildren().size() == 0) return;// empty method.
+
+		if (methodBodySimpleTree.getChildren().isEmpty()) {
+			return;
+		}
+
 		String tokens = new Tokenizer().getAbstractTokensDeepFirst(methodBodySimpleTree).toString();
 		List<ITree> children = methodBodyTree.getChildren();
 		List<ITree> childStmts = new ArrayList<>();
@@ -136,7 +140,9 @@ public class JavaFileParser {
 		//Remove getter and setter methods.
 		if (ignoreGetterAndSetterMethods) {
 			if (methodName.startsWith("get") || methodName.startsWith("set") || methodName.startsWith("is")) {
-				if (childStmts.size() == 1) return;
+				if (childStmts.size() == 1) {
+					return;
+				}
 			}
 		}
 		methodBodyTree.setChildren(childStmts);
@@ -147,7 +153,7 @@ public class JavaFileParser {
 		Method method = new Method(projectName, packageName, className, returnType, methodName, methodBodySourceCode, isConstructor, arguments);
 		method.setBodyCodeTokens(tokens);
 		method.setBodyCodeRawTokens(rawTokens);
-		if (!isConstructor) {// Constructor.
+		if (!isConstructor) {
 			methods.add(method);
 		}
 	}
@@ -161,7 +167,7 @@ public class JavaFileParser {
 		return javaCode.substring(startPos, endPos);
 	}
 
-	public class MyUnit {
+	public static class MyUnit {
 		
 		public CompilationUnit createCompilationUnit(File javaFile) {
 			char[] javaCode = readFileToCharArray(javaFile);
@@ -199,14 +205,13 @@ public class JavaFileParser {
 				try {
 					if (br != null) {
 						br.close();
-						br = null;
-					}
+          }
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 
-			if (fileData.length() > 0)
+			if (!fileData.isEmpty())
 				return fileData.toString().toCharArray();
 			else return new char[0];
 		}
@@ -218,9 +223,9 @@ public class JavaFileParser {
 	 * @author kui.liu
 	 *
 	 */
-	public class MethodBodyTreeReader {
-		public SimpleTree methodBodyStatementTrees = new SimpleTree();
-		public String argus = "";
+	private static class MethodBodyTreeReader {
+		private final SimpleTree methodBodyStatementTrees = new SimpleTree();
+		private String argus = "";
 		
 		public void readToken(ITree methodBodyTree) {
 			String methodDeclarationLabel = methodBodyTree.getLabel();

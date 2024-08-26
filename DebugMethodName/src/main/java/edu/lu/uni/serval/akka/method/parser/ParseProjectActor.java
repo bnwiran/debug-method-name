@@ -70,9 +70,8 @@ public class ParseProjectActor extends UntypedActor {
 					if (i == numberOfWorkers - 1) {
 						toIndex = size;
 					}
-					
-					List<String> projectsOfWorkers = new ArrayList<>();
-					projectsOfWorkers.addAll(projectList.subList(fromIndex, toIndex));
+
+          List<String> projectsOfWorkers = new ArrayList<>(projectList.subList(fromIndex, toIndex));
 					final ProjectsMessage pro = new ProjectsMessage(projectsOfWorkers, i + 1, outputPath);
 					travelRouter.tell(pro, getSelf());
 					logger.debug("Assign a task to worker #" + (i + 1) + "...");
@@ -99,9 +98,8 @@ public class ParseProjectActor extends UntypedActor {
 						if (i == numberOfWorkers - 1) {
 							toIndex = size;
 						}
-						
-						List<String> javaFilesOfWorkers = new ArrayList<>();
-						javaFilesOfWorkers.addAll(javaFiles.subList(fromIndex, toIndex));
+
+            List<String> javaFilesOfWorkers = new ArrayList<>(javaFiles.subList(fromIndex, toIndex));
 						ProjectsMessage pro = new ProjectsMessage(project, i + 1, outputPath);
 						pro.setJavaFilePathes(javaFilesOfWorkers);
 						travelRouter.tell(pro, getSelf());

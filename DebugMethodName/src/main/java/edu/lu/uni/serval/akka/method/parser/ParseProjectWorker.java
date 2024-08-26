@@ -87,8 +87,8 @@ public class ParseProjectWorker extends UntypedActor {
 						}
 					}
 				} else {
-					List<String> javaFilePathes = pro.getJavaFilePathes();
-					for (String javaFilePath : javaFilePathes) {
+					List<String> javaFilePaths = pro.getJavaFilePathes();
+					for (String javaFilePath : javaFilePaths) {
 						JavaFileParser jfp = new JavaFileParser();
 						jfp.parseJavaFile(projectName, new File(javaFilePath));
 						List<Method> methods= jfp.getMethods();

@@ -7,8 +7,8 @@ This work will be presented at ICSE 2019.
 
 Requirement
 ------------
-  - Java 1.8
-  - Maven 3.3.9
+  - Java 21
+  - Maven 3.9.8
   
 
 How to run debug-method-name

@@ -20,7 +20,6 @@ https://github.com/apache/asterixdb.git
 https://github.com/apache/aurora.git
 https://github.com/google/auto.git
 https://github.com/apache/avro.git
-https://github.com/apache/axis2-java.git
 https://github.com/apache/batik.git
 https://github.com/apache/beam.git
 https://github.com/apache/bigtop.git
@@ -54,7 +53,6 @@ https://github.com/apache/commons-csv.git
 https://github.com/apache/commons-dbcp.git
 https://github.com/apache/commons-dbutils.git
 https://github.com/apache/commons-digester.git
-https://github.com/apache/commons-discovery.git
 https://github.com/apache/commons-email.git
 https://github.com/apache/commons-exec.git
 https://github.com/apache/commons-fileupload.git
@@ -67,7 +65,6 @@ https://github.com/apache/commons-jelly.git
 https://github.com/apache/commons-jexl.git
 https://github.com/apache/commons-jxpath.git
 https://github.com/apache/commons-lang.git
-https://github.com/apache/commons-launcher.git
 https://github.com/apache/commons-logging.git
 https://github.com/apache/commons-math.git
 https://github.com/leloulight/commons-modeler.git
@@ -76,7 +73,6 @@ https://github.com/apache/commons-ognl.git
 https://github.com/apache/commons-pool.git
 https://github.com/apache/commons-proxy.git
 https://github.com/apache/commons-scxml.git
-https://github.com/apache/commons-transaction.git
 https://github.com/apache/commons-validator.git
 https://github.com/apache/commons-vfs.git
 https://github.com/apache/commons-weaver.git
@@ -96,15 +92,12 @@ https://github.com/apache/ddlutils.git
 https://github.com/apache/deltaspike.git
 https://github.com/apache/derby.git
 https://github.com/apache/directmemory.git
-https://github.com/apache/directory-daemon.git
 https://github.com/apache/directory-fortress-commander.git
 https://github.com/apache/directory-fortress-core.git
 https://github.com/apache/directory-fortress-enmasse.git
 https://github.com/apache/directory-fortress-realm.git
-https://github.com/apache/directory-installers.git
 https://github.com/apache/directory-kerby.git
 https://github.com/apache/directory-server.git
-https://github.com/apache/directory-shared.git
 https://github.com/apache/directory-studio.git
 https://github.com/apache/drill.git
 https://github.com/apache/eagle.git
@@ -283,13 +276,10 @@ https://github.com/apache/poi.git
 https://github.com/apache/polygene-java.git
 https://github.com/apache/portals-pluto.git
 https://github.com/apache/qpid.git
-https://github.com/apache/qpid-java.git
 https://github.com/apache/qpid-jms.git
 https://github.com/apache/ranger.git
-https://github.com/apache/rat.git
 https://github.com/apache/rave.git
 https://github.com/apache/reef.git
-https://github.com/apache/river.git
 https://github.com/apache/roller.git
 https://github.com/apache/samza.git
 https://github.com/apache/samza-hello-samza.git
@@ -300,7 +290,6 @@ https://github.com/apache/servicemix.git
 https://github.com/apache/servicemix3.git
 https://github.com/apache/servicemix4-bundles.git
 https://github.com/apache/servicemix4-features.git
-https://github.com/apache/servicemix4-kernel.git
 https://github.com/apache/servicemix4-nmr.git
 https://github.com/apache/servicemix4-specs.git
 https://github.com/apache/servicemix-archetypes.git
@@ -346,7 +335,6 @@ https://github.com/spring-projects/spring-integration-java-dsl.git
 https://github.com/spring-projects/spring-integration-kafka.git
 https://github.com/spring-projects/spring-kafka.git
 https://github.com/spring-projects/spring-ldap.git
-https://github.com/spring-projects/spring-loaded.git
 https://github.com/spring-projects/spring-migration-analyzer.git
 https://github.com/spring-projects/spring-mobile.git
 https://github.com/spring-projects/spring-net-threading.git
@@ -384,7 +372,6 @@ https://github.com/apache/struts.git
 https://github.com/apache/struts1.git
 https://github.com/apache/syncope.git
 https://github.com/apache/tajo.git
-https://github.com/apache/tapestry5.git
 https://github.com/apache/tapestry-5.git
 https://github.com/apache/tez.git
 https://github.com/apache/tika.git
@@ -392,10 +379,7 @@ https://github.com/apache/tiles.git
 https://github.com/apache/tinkerpop.git
 https://github.com/apache/tomcat.git
 https://github.com/apache/tomcat55.git
-https://github.com/apache/tomcat60.git
-https://github.com/apache/tomcat70.git
 https://github.com/apache/tomcat80.git
-https://github.com/apache/tomcat85.git
 https://github.com/apache/tomcat-maven-plugin.git
 https://github.com/apache/tomee.git
 https://github.com/spring-projects/toolsuite-distribution.git
@@ -405,7 +389,6 @@ https://github.com/apache/tuscany-sca-2.x.git
 https://github.com/apache/tuscany-sdo.git
 https://github.com/apache/twill.git
 https://github.com/apache/uima-addons.git
-https://github.com/apache/uima-as.git
 https://github.com/apache/uima-ducc.git
 https://github.com/apache/uima-ruta.git
 https://github.com/apache/uima-sandbox.git
@@ -415,8 +398,6 @@ https://github.com/apache/usergrid.git
 https://github.com/apache/velocity-engine.git
 https://github.com/apache/velocity-tools.git
 https://github.com/apache/vxquery.git
-https://github.com/apache/vysper.git
-https://github.com/apache/webservices-axiom.git
 https://github.com/apache/whirr.git
 https://github.com/apache/wicket.git
 https://github.com/apache/wink.git

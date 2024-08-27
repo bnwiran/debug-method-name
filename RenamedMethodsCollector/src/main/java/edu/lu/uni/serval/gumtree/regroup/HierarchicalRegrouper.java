@@ -50,8 +50,6 @@ public class HierarchicalRegrouper {
 			if (parentAct != null) {
 				addToActionSets(actSet, parentAct, actionSets);
 			} else {
-				// TypeDeclaration, FieldDeclaration, MethodDeclaration, Statement. 
-				// CatchClause, ConstructorInvocation, SuperConstructorInvocation, SwitchCase
 				String astNodeType = actSet.getAstNodeType();
 				if (astNodeType.endsWith("TypeDeclaration") || astNodeType.endsWith("FieldDeclaration")  || astNodeType.endsWith("EnumDeclaration") || 
 						astNodeType.endsWith("MethodDeclaration") || astNodeType.endsWith("Statement") || 
@@ -74,21 +72,19 @@ public class HierarchicalRegrouper {
 	}
 
 	private String parseAction(String actStr1) {
-		// UPD 25@@!a from !a to isTrue(a) at 69
 		String[] actStrArrays = actStr1.split("@@");
-		String actStr = "";
+		StringBuilder actStr = new StringBuilder();
 		int length = actStrArrays.length;
 		for (int i =0; i < length - 1; i ++) {
 			String actStrFrag = actStrArrays[i];
 			int index = actStrFrag.lastIndexOf(" ") + 1;
 			String nodeType = actStrFrag.substring(index);
-			if (!"".equals(nodeType)) {
+			if (!nodeType.isEmpty()) {
 				if (Character.isDigit(nodeType.charAt(0)) || (nodeType.startsWith("-") && Character.isDigit(nodeType.charAt(1)))) {
 					try {
 						int typeInt = Integer.parseInt(nodeType);
 						if (ASTNodeMap.map.containsKey(typeInt)) {
-							String type = ASTNodeMap.map.get(Integer.parseInt(nodeType));
-							nodeType = type;
+              nodeType = ASTNodeMap.map.get(Integer.parseInt(nodeType));
 						}
 					} catch (NumberFormatException e) {
 						nodeType = actStrFrag.substring(index);
@@ -96,10 +92,10 @@ public class HierarchicalRegrouper {
 				}
 			}
 			actStrFrag = actStrFrag.substring(0, index) + nodeType + "@@";
-			actStr += actStrFrag;
+			actStr.append(actStrFrag);
 		}
-		actStr += actStrArrays[length - 1];
-		return actStr;
+		actStr.append(actStrArrays[length - 1]);
+		return actStr.toString();
 	}
 	
 	private void addToActionSets(HierarchicalActionSet actionSet, Action parentAct, List<HierarchicalActionSet> actionSets) {
@@ -115,15 +111,14 @@ public class HierarchicalRegrouper {
 				sortSubActions(actSet);
 				break;
 			} else {
-				if (isPossibileSubAction(action, act)) {
-					// SubAction range： startPosition2 <= startPosition && startPosition + length <= startPosition2 + length2
+				if (isPossibleSubAction(action, act)) {
 					addToActionSets(actionSet, parentAct, actSet.getSubActions());
 				}
 			}
 		}
 	}
 
-	private boolean isPossibileSubAction(Action parent, Action child) {
+	private boolean isPossibleSubAction(Action parent, Action child) {
 		if ((parent instanceof Update && !(child instanceof Addition))
 				|| (parent instanceof Delete && child instanceof Delete)
 				|| (parent instanceof Insert && (child instanceof Insert))) {
@@ -141,7 +136,7 @@ public class HierarchicalRegrouper {
 	}
 
 	private void sortSubActions(HierarchicalActionSet actionSet) {
-		List<HierarchicalActionSet> subActions = actionSet.getSubActions().stream().sorted().toList();
+		List<HierarchicalActionSet> subActions = new ArrayList<>(actionSet.getSubActions().stream().sorted().toList());
     actionSet.setSubActions(subActions);
   }
 
@@ -157,15 +152,12 @@ public class HierarchicalRegrouper {
 				sortSubActions(actionSet);
 				return true;
 			} else {
-				if (isPossibileSubAction(action, act)) {
-					// SubAction range： startPosition2 <= startPosition && startPosition + length <= startP + length2
+				if (isPossibleSubAction(action, act)) {
 					List<HierarchicalActionSet> subActionSets = actionSet.getSubActions();
-					if (subActionSets.size() > 0) {
+					if (!subActionSets.isEmpty()) {
 						boolean added = addToActionSet(act, parentAct, subActionSets);
 						if (added) {
 							return true;
-						} else {
-							continue;
 						}
 					}
 				}

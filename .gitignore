@@ -7,3 +7,6 @@ target/
 /.idea/
 /Data/Output/
 /logs/
+/Data/JavaRepos/
+!/Data/JavaRepos/git-clone-repos.sh
+!/Data/JavaRepos/repos.txt
